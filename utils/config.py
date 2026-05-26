@@ -44,13 +44,14 @@ DEFAULT_CONFIG = {
     "training": {
         "optimizer": "adam",
         "lr": 5e-4,
-        "steps": 2000,
+        "steps": 1500,
         "grad_clip": 1.0,
         "log_every": 50,
         "dtype": "float64",
         "sampling_mode": "jittered_grid",
         "grid_jitter_frac": 0.35,
         "mc_points": 4096,
+        "diagnostics_every": 25,
         "lr_schedule": {
             "enabled": True,
             "type": "plateau",
@@ -62,6 +63,14 @@ DEFAULT_CONFIG = {
             "min_lr": 1e-6,
             "eps": 1e-12,
             "monitor_ema_alpha": 0.1,
+        },
+        "early_stopping": {
+            "enabled": True,
+            "eval_every": 50,
+            "min_steps": 500,
+            "patience_evals": 4,
+            "min_delta_rel": 5e-4,
+            "validation_nq": None,
         },
         "loss_weights": {
             "eigsum": 1.0,
@@ -163,6 +172,8 @@ def validate_config(cfg: dict) -> dict:
         raise ValueError("training.grid_jitter_frac must be non-negative")
     if int(cfg["training"].get("mc_points", 1)) <= 0:
         raise ValueError("training.mc_points must be positive")
+    if int(cfg["training"].get("diagnostics_every", 1)) <= 0:
+        raise ValueError("training.diagnostics_every must be positive")
 
     lr_sched = dict(cfg["training"].get("lr_schedule", {}))
     if bool(lr_sched.get("enabled", False)):
@@ -186,6 +197,21 @@ def validate_config(cfg: dict) -> dict:
         alpha = float(lr_sched.get("monitor_ema_alpha", 0.1))
         if alpha <= 0 or alpha > 1:
             raise ValueError("training.lr_schedule.monitor_ema_alpha must be in (0, 1]")
+
+    early_stop = dict(cfg["training"].get("early_stopping", {}))
+    if bool(early_stop.get("enabled", False)):
+        if int(early_stop.get("eval_every", 1)) <= 0:
+            raise ValueError("training.early_stopping.eval_every must be positive")
+        if int(early_stop.get("min_steps", 0)) < 0:
+            raise ValueError("training.early_stopping.min_steps must be >= 0")
+        if int(early_stop.get("patience_evals", 1)) < 1:
+            raise ValueError("training.early_stopping.patience_evals must be >= 1")
+        min_delta_rel = float(early_stop.get("min_delta_rel", 0.0))
+        if min_delta_rel < 0:
+            raise ValueError("training.early_stopping.min_delta_rel must be >= 0")
+        validation_nq = early_stop.get("validation_nq", None)
+        if validation_nq is not None and int(validation_nq) < 2:
+            raise ValueError("training.early_stopping.validation_nq must be >= 2 when provided")
 
     return cfg
 

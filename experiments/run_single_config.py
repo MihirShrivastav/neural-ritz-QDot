@@ -326,9 +326,21 @@ def main() -> None:
                 "steps": len(outputs.history),
                 "training_dtype": str(dtype).replace("torch.", ""),
                 "sampling_mode": str(cfg["training"].get("sampling_mode", "jittered_grid")),
+                "diagnostics_every": int(cfg["training"].get("diagnostics_every", 25)),
                 "lr_schedule": {
                     "enabled": bool(cfg["training"].get("lr_schedule", {}).get("enabled", False)),
                     "type": str(cfg["training"].get("lr_schedule", {}).get("type", "plateau")),
+                },
+                "early_stopping": {
+                    "enabled": bool(cfg["training"].get("early_stopping", {}).get("enabled", False)),
+                    "eval_every": int(cfg["training"].get("early_stopping", {}).get("eval_every", 50)),
+                    "min_steps": int(cfg["training"].get("early_stopping", {}).get("min_steps", 0)),
+                    "patience_evals": int(cfg["training"].get("early_stopping", {}).get("patience_evals", 4)),
+                    "min_delta_rel": float(cfg["training"].get("early_stopping", {}).get("min_delta_rel", 5e-4)),
+                    "validation_nq": cfg["training"].get("early_stopping", {}).get("validation_nq", None),
+                    "stopped_early": bool(outputs.stopped_early),
+                    "stop_reason": outputs.stop_reason,
+                    "best_validation_eigsum": outputs.best_validation_eigsum,
                 },
                 "lr_dropout_info": _extract_lr_drop_events(outputs.history),
                 "plots": {

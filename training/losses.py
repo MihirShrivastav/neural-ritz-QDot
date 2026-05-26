@@ -14,7 +14,8 @@ def s_condition_penalty(
     min_eig_floor: float = 1e-8,
     eps: float = 1e-12,
     diag_target: float = 1.0,
-) -> torch.Tensor:
+    return_eigvals: bool = False,
+) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
     """
     Scale-invariant overlap regularizer.
 
@@ -36,4 +37,7 @@ def s_condition_penalty(
     corr_pen = ((C - I) ** 2).mean()
     diag_pen = ((d_clamped - diag_target) ** 2).mean()
 
-    return pd_pen + corr_pen + diag_pen
+    total = pd_pen + corr_pen + diag_pen
+    if return_eigvals:
+        return total, evals
+    return total
