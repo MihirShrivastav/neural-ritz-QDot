@@ -44,7 +44,7 @@ DEFAULT_CONFIG = {
     "training": {
         "optimizer": "adam",
         "lr": 5e-4,
-        "steps": 1500,
+        "steps": 500,
         "grad_clip": 1.0,
         "log_every": 50,
         "dtype": "float64",
