@@ -351,3 +351,104 @@ def plot_matrix_heatmap(
     fig.tight_layout()
     fig.savefig(out_path, dpi=180)
     plt.close(fig)
+
+
+def plot_pair_density_maps(
+    densities: dict[str, np.ndarray],
+    x: np.ndarray,
+    y: np.ndarray,
+    out_dir: str | Path,
+    prefix: str = "pair_one_body_density",
+) -> None:
+    out = _ensure_out_dir(out_dir)
+    extent = [float(np.min(x)), float(np.max(x)), float(np.min(y)), float(np.max(y))]
+    for sector, density in densities.items():
+        fig, ax = plt.subplots(figsize=(7, 5))
+        im = ax.imshow(
+            np.asarray(density, dtype=float),
+            origin="lower",
+            extent=extent,
+            aspect="equal",
+            cmap="viridis",
+            interpolation="bicubic",
+        )
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.set_title(f"{sector.title()} One-Body Density")
+        ax.set_aspect("equal")
+        fig.colorbar(im, ax=ax, label="rho(x, y)")
+        fig.tight_layout()
+        fig.savefig(out / f"{prefix}_{sector}.png", dpi=180)
+        plt.close(fig)
+
+
+def plot_pair_conditional_maps(
+    densities: dict[str, np.ndarray],
+    x: np.ndarray,
+    y: np.ndarray,
+    out_dir: str | Path,
+) -> None:
+    out = _ensure_out_dir(out_dir)
+    extent = [float(np.min(x)), float(np.max(x)), float(np.min(y)), float(np.max(y))]
+    for sector, density in densities.items():
+        fig, ax = plt.subplots(figsize=(7, 5))
+        im = ax.imshow(
+            np.asarray(density, dtype=float),
+            origin="lower",
+            extent=extent,
+            aspect="equal",
+            cmap="magma",
+            interpolation="bicubic",
+        )
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.set_title(f"{sector.title()} Conditional Pair Density")
+        ax.set_aspect("equal")
+        fig.colorbar(im, ax=ax, label="P(r2 | r1 anchor)")
+        fig.tight_layout()
+        fig.savefig(out / f"pair_conditional_density_{sector}.png", dpi=180)
+        plt.close(fig)
+
+
+def plot_pair_exchange_summary(exchange_payload: dict, out_dir: str | Path) -> None:
+    out = _ensure_out_dir(out_dir)
+    labels = []
+    vals = []
+    if exchange_payload.get("singlet_ground_E_dimless") is not None:
+        labels.append("S0")
+        vals.append(float(exchange_payload["singlet_ground_E_dimless"]))
+    if exchange_payload.get("triplet_ground_E_dimless") is not None:
+        labels.append("T0")
+        vals.append(float(exchange_payload["triplet_ground_E_dimless"]))
+    if not vals:
+        return
+
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.bar(labels, vals, color=["tab:blue", "tab:orange"][: len(vals)])
+    ax.set_ylabel("Energy (dimensionless)")
+    title = "Two-Electron Sector Energies"
+    if exchange_payload.get("J_dimless") is not None:
+        title += f" | J={float(exchange_payload['J_dimless']):.6f}"
+    ax.set_title(title)
+    ax.grid(True, axis="y", alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(out / "pair_exchange_summary.png", dpi=180)
+    plt.close(fig)
+
+
+def plot_ci_weight_spectrum(weights_by_sector: dict[str, np.ndarray], out_dir: str | Path) -> None:
+    out = _ensure_out_dir(out_dir)
+    if not weights_by_sector:
+        return
+    fig, ax = plt.subplots(figsize=(7, 4))
+    for sector, weights in weights_by_sector.items():
+        w = np.asarray(weights, dtype=float)
+        ax.semilogy(np.arange(1, len(w) + 1), np.clip(w, 1e-16, None), marker="o", lw=1.0, label=sector.title())
+    ax.set_xlabel("CI component rank")
+    ax.set_ylabel("Weight")
+    ax.set_title("Ground-State CI Weight Spectrum")
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(out / "pair_ci_weight_spectrum.png", dpi=180)
+    plt.close(fig)

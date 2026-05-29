@@ -7,9 +7,11 @@ This document explains:
 
 It is aligned with the current code in:
 - `experiments/run_single_config.py`
+- `experiments/run_electron_pair.py`
 - `training/trainer.py`
 - `training/losses.py`
 - `numerics/ritz.py`
+- `numerics/pair_ci.py`
 - `models/siren.py`
 - `models/envelopes.py`
 - `utils/config.py`
@@ -70,6 +72,7 @@ Default config lives in `utils/config.py`.
 |---|---|---|
 | `material` | Material label (currently informational) | Saved in config/report context. |
 | `m_eff` | Effective mass | Used for energy conversion to meV (`E_meV`). |
+| `epsilon_r` | Relative dielectric constant | Default material dielectric used for electron-pair Coulomb scaling. |
 | `L0_nm` | Characteristic length scale (nm) | Used for energy conversion factor `E0_meV`. |
 
 ### `domain`
@@ -137,6 +140,7 @@ For biquadratic potentials, the run saves resolved physical/derived values in:
 | `sampling_mode` | Quadrature sampling strategy | `jittered_grid`/`monte_carlo` reduce fixed-grid aliasing; `fixed_grid` is deterministic. |
 | `grid_jitter_frac` | Jitter amplitude for `jittered_grid` | Larger values add stronger anti-aliasing but more stochasticity. |
 | `mc_points` | Number of points for `monte_carlo` mode | More points reduce variance but increase step cost. |
+| `diagnostics_every` | Cadence for heavy overlap diagnostics | Larger values reduce per-step overhead by avoiding a full conditioning spectrum on every step. |
 | `lr_schedule.enabled` | Enable learning-rate decay | When true, LR is reduced automatically on plateaus. |
 | `lr_schedule.type` | Scheduler type | Current supported value: `plateau`. |
 | `lr_schedule.factor` | LR decay multiplier | New LR = old LR * factor when triggered. |
@@ -146,10 +150,28 @@ For biquadratic potentials, the run saves resolved physical/derived values in:
 | `lr_schedule.cooldown` | Post-decay cooldown (steps) | Delay before another decay can occur. |
 | `lr_schedule.min_lr` | Lower bound on LR | Prevents LR from shrinking to zero. |
 | `lr_schedule.monitor_ema_alpha` | EMA smoothing on monitor signal | Smooths noisy eigsum when using stochastic sampling. |
+| `early_stopping.enabled` | Enable deterministic early stopping | Evaluates eigsum on a fixed validation grid and stops when improvements stall. |
+| `early_stopping.eval_every` | Validation cadence in training steps | Controls how often fixed-grid validation is run. |
+| `early_stopping.min_steps` | Minimum steps before stopping can trigger | Prevents premature stopping during the fast transient phase. |
+| `early_stopping.patience_evals` | Number of stale validations tolerated | Higher values are more conservative. |
+| `early_stopping.min_delta_rel` | Required relative improvement in validation eigsum | Filters out negligible improvements from stochastic training noise. |
+| `early_stopping.validation_nq` | Optional fixed-grid resolution for validation | When omitted, validation uses the training `domain.nq`. |
 | `loss_weights.eigsum` | Weight on eigen-sum term | Increases priority on low energies. |
 | `loss_weights.S_condition` | Weight on overlap conditioning term | Stabilizes `S`; too high can slow energy minimization. |
 | `loss_weights.boundary` | Placeholder in config | Not used in current trainer implementation. |
 | `loss_weights.pde_polish` | Placeholder in config | Not used in current trainer implementation. |
+
+### `pair`
+
+| Key | Meaning | Effect |
+|---|---|---|
+| `enabled` | Enable electron-pair workflow | Required by `experiments.run_electron_pair`; ignored by the one-electron CLI. |
+| `num_orbitals` | Number of one-electron orbitals used for CI | The pair entrypoint runs the one-electron stage with `solver.K = num_orbitals`. |
+| `sectors` | Two-electron symmetry sectors | Supported values: `singlet`, `triplet`. |
+| `coulomb.epsilon_r` | Relative dielectric constant for Coulomb scaling | Used when `coulomb.strength = "material"`. |
+| `coulomb.softening` | Dimensionless Coulomb softening length | Regularizes the short-range singularity and represents finite thickness/numerical smoothing. |
+| `coulomb.strength` | Coulomb strength mode | `material` derives from material scaling, `zero` disables interaction for validation, or a non-negative number can be used directly. |
+| `coulomb.integration` | Coulomb integral backend | `fft_convolution` for normal runs; `direct` for small validation tests. |
 
 ## 4. Current SIREN architecture used here
 
@@ -194,9 +216,11 @@ Logged training metrics include:
 - `s_min_eig`, `s_max_eig`, `s_cond_est`
 - `grad_norm`, `dt_sec`
 - `lr`, `lr_reduced`, `lr_monitor`
+- `validation_eigsum` on fixed-grid validation steps when early stopping is enabled
 
 `reports/final_summary.json` now includes:
 - `lr_schedule` metadata
+- `early_stopping` metadata and whether the run stopped early
 - `lr_dropout_info` with LR drop events (`step`, `lr_prev`, `lr_new`, `lr_monitor`)
 
 Potential plotting outputs include:
@@ -204,6 +228,16 @@ Potential plotting outputs include:
 - `potential_map_focus.png` (range focused to reveal central barrier shape)
 - `potential_map.png` (alias of focused map for compatibility)
 - `potential_slice_y0.png`
+
+Electron-pair runs add:
+- `reports/pair_energies.json`
+- `reports/pair_exchange.json`
+- `reports/pair_coulomb_report.json`
+- pair one-body and conditional density arrays
+- `pair_exchange_summary.png`
+- `pair_ci_weight_spectrum.png`
+- `pair_one_body_density_<sector>.png`
+- `pair_conditional_density_<sector>.png`
 
 ## 6. Practical tuning suggestions
 
@@ -228,3 +262,5 @@ If convergence is slow:
 - LBFGS refine and PDE residual polish are not yet wired into the trainer.
 - Config keys for `boundary` and `pde_polish` are reserved for upcoming loss extensions.
 - Artifact arrays/reports are always generated from a fixed post-training evaluation grid, even if training used stochastic sampling.
+- The electron-pair workflow is a neural-orbital CI solver, not a direct 4D neural wavefunction solver.
+- Spin is handled by singlet/triplet spatial symmetry sectors; magnetic field, spin-orbit coupling, and time dynamics are out of scope for the first electron-pair milestone.

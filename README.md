@@ -32,6 +32,18 @@ The central innovation here is a Block-Ritz neural variational solver:
 
 This avoids sequential per-state training and enables multi-eigenpair prediction within a single training regime.
 
+## Electron-Pair Extension
+
+The `electron-pair` workflow adds a two-electron configuration-interaction layer on top of the learned one-electron orbitals:
+
+1. Run the existing Block-Ritz one-electron solver with enough orbitals.
+2. Use the final deterministic orbitals as a compact single-particle basis.
+3. Build singlet and triplet spatial CI sectors.
+4. Assemble Coulomb matrix elements with a softened material-scaled interaction.
+5. Diagonalize the two-electron Hamiltonian and report the exchange splitting `J = E_triplet_0 - E_singlet_0`.
+
+This keeps the neural solver focused on learning device-adapted orbitals while the interacting pair problem is solved in a symmetry-correct many-body basis.
+
 ## Physics Problem
 
 We solve (dimensionless form):
@@ -191,6 +203,20 @@ python -m experiments.run_single_config --config path/to/config.json --experimen
 python -m experiments.run_default_random
 ```
 
+### Electron-pair run
+
+Run one-electron training first, then append two-electron CI reports and plots to the same run directory:
+
+```bash
+python -m experiments.run_electron_pair --experiment-name pair_run --seed 42
+```
+
+Reuse an existing one-electron run directory:
+
+```bash
+python -m experiments.run_electron_pair --config path/to/config.json --one-electron-run results/my_run/run_id
+```
+
 ## Run Artifacts
 
 Each run is stored under:
@@ -212,6 +238,7 @@ Key reports:
 - `potential_report.json`
 - `checkpoint_report.json`
 - `final_summary.json`
+- electron-pair runs also add `pair_energies.json`, `pair_exchange.json`, and `pair_coulomb_report.json`
 
 Key arrays:
 
@@ -221,6 +248,7 @@ Key arrays:
 - `overlap_S.npy`
 - `hamiltonian_H.npy`
 - `psi_overlap.npy`
+- electron-pair runs also add pair CI coefficients, one-body densities, conditional densities, Coulomb tensor, and product Hamiltonian arrays
 
 Representative plots:
 
@@ -246,6 +274,7 @@ Current scope:
 
 - single-configuration runs,
 - one-electron 2D potentials,
+- two-electron singlet/triplet CI from learned one-electron orbitals,
 - multi-state extraction via Block-Ritz.
 
 Not yet fully implemented in the training loop:
@@ -253,6 +282,7 @@ Not yet fully implemented in the training loop:
 - full phased optimizer schedule (for example explicit LBFGS polish stage),
 - PDE residual polish term integration,
 - cross-potential amortized operator learning.
+- direct 4D neural two-electron wavefunction or VMC/FermiNet-style ansatz.
 
 ## Reproducibility Notes
 

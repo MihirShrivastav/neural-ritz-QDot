@@ -11,6 +11,7 @@ DEFAULT_CONFIG = {
     "physics": {
         "material": "GaAs",
         "m_eff": 0.067,
+        "epsilon_r": 12.9,
         "L0_nm": 30.0,
     },
     "domain": {
@@ -79,6 +80,17 @@ DEFAULT_CONFIG = {
             "pde_polish": 0.0,
         },
     },
+    "pair": {
+        "enabled": True,
+        "num_orbitals": 8,
+        "sectors": ["singlet", "triplet"],
+        "coulomb": {
+            "epsilon_r": 12.9,
+            "softening": 0.05,
+            "strength": "material",
+            "integration": "fft_convolution",
+        },
+    },
 }
 
 
@@ -121,6 +133,8 @@ def validate_config(cfg: dict) -> dict:
 
     if int(cfg["domain"]["nq"]) < 2:
         raise ValueError("domain.nq must be >= 2")
+    if float(cfg["physics"].get("epsilon_r", 1.0)) <= 0:
+        raise ValueError("physics.epsilon_r must be positive")
 
     potential = cfg.get("potential", {})
     ptype = str(potential.get("type", "biquadratic_dqd"))
@@ -212,6 +226,36 @@ def validate_config(cfg: dict) -> dict:
         validation_nq = early_stop.get("validation_nq", None)
         if validation_nq is not None and int(validation_nq) < 2:
             raise ValueError("training.early_stopping.validation_nq must be >= 2 when provided")
+
+    pair = dict(cfg.get("pair", {}))
+    if bool(pair.get("enabled", False)):
+        num_orbitals = int(pair.get("num_orbitals", 0))
+        if num_orbitals < 2:
+            raise ValueError("pair.num_orbitals must be >= 2")
+        if num_orbitals > M:
+            raise ValueError("pair.num_orbitals must be <= solver.M")
+        sectors = [str(s).lower() for s in pair.get("sectors", [])]
+        supported_sectors = {"singlet", "triplet"}
+        if not sectors:
+            raise ValueError("pair.sectors must not be empty")
+        bad_sectors = sorted(set(sectors) - supported_sectors)
+        if bad_sectors:
+            raise ValueError(f"pair.sectors contains unsupported values: {bad_sectors}")
+
+        coulomb = dict(pair.get("coulomb", {}))
+        if float(coulomb.get("epsilon_r", cfg["physics"].get("epsilon_r", 12.9))) <= 0:
+            raise ValueError("pair.coulomb.epsilon_r must be positive")
+        if float(coulomb.get("softening", 0.0)) < 0:
+            raise ValueError("pair.coulomb.softening must be non-negative")
+        strength = coulomb.get("strength", "material")
+        if isinstance(strength, str):
+            if strength.lower() not in {"material", "zero"}:
+                raise ValueError("pair.coulomb.strength must be 'material', 'zero', or a non-negative number")
+        elif float(strength) < 0:
+            raise ValueError("pair.coulomb.strength must be non-negative")
+        integration = str(coulomb.get("integration", "fft_convolution")).lower()
+        if integration not in {"fft_convolution", "direct"}:
+            raise ValueError("pair.coulomb.integration must be one of: fft_convolution, direct")
 
     return cfg
 
