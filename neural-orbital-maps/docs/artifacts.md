@@ -34,11 +34,14 @@ Required pair reports:
 - `pair_exchange.json`
 - `density_checks.json`
 - `ci_weights.json`
+- `hubbard_report.json`
 - `correlation_report.json`
 - `pair_correlation_report.json`
 - `final_summary.json`
 
 `correlation_report.json` includes normalized natural-occupation entropy, linear entropy, effective orbital count, dominant occupation fraction, charge-sector probabilities, left/right density integrals, and heuristic interpretation labels. The labels are run-triage aids, not calibrated physical phase boundaries.
+
+`hubbard_report.json` includes approximate two-site parameters from the lowest two localized orbitals plus a simple singlet/triplet Hubbard estimate. It is an interpretation and validation diagnostic, not the primary solver output.
 
 `training_metrics.json` includes logged eigsum/E0 history and `training_status` with completed steps, configured steps, early-stop flag, stop reason, and best eigsum. `final_summary.json` repeats the training status for one-electron and pair-CI runs.
 

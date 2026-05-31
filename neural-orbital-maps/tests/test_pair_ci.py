@@ -1,5 +1,6 @@
 import numpy as np
 
+from neural_orbital_maps.analysis.hubbard import two_site_hubbard_report
 from neural_orbital_maps.analysis.observables import (
     charge_sector_probabilities,
     correlation_report,
@@ -99,6 +100,15 @@ def test_pair_correlation_map_has_normalized_conditional_density():
     assert ratio.shape == orbitals.shape[1:]
     assert np.isclose(report["conditional_integral"], 1.0)
     assert report["ratio_max"] >= report["ratio_min"]
+
+
+def test_two_site_hubbard_report_is_available_for_two_orbitals():
+    energies = np.array([1.0, 2.0])
+    coulomb = np.zeros((2, 2, 2, 2))
+    report = two_site_hubbard_report(energies, coulomb)
+    assert report["available"] is True
+    assert np.isclose(report["parameters_dimless"]["t"], 0.5)
+    assert "J_hubbard" in report["energies_dimless"]
 
 
 def test_correlation_interpretation_labels_regimes():

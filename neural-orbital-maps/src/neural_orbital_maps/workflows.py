@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from neural_orbital_maps.analysis.hubbard import two_site_hubbard_report
 from neural_orbital_maps.analysis.observables import conditional_density, correlation_report, localized_orbitals_from_lowest_pair, pair_correlation_map
 from neural_orbital_maps.analysis.reports import ci_weights, density_checks, exchange_report, one_electron_quality_report, orthonormality_report
 from neural_orbital_maps.io.artifacts import load_json, save_arrays, save_json
@@ -219,6 +220,11 @@ def run_pair_ci(config: RunConfig) -> Path:
         save_json(paths.reports / "pair_exchange.json", exchange)
         save_json(paths.reports / "density_checks.json", density_checks(pair, result.grid.cell_area))
         save_json(paths.reports / "ci_weights.json", ci_weights(pair))
+        _, localized_report = localized_orbitals_from_lowest_pair(result.orbitals[: config.pair.num_orbitals], result.grid.x, result.grid.cell_area)
+        save_json(
+            paths.reports / "hubbard_report.json",
+            two_site_hubbard_report(result.energies[: config.pair.num_orbitals], pair.coulomb_tensor, localized_report.get("sign", 1.0)),
+        )
         save_json(
             paths.reports / "correlation_report.json",
             correlation_report(pair, result.grid.x, result.grid.cell_area, result.orbitals[: config.pair.num_orbitals]),
@@ -284,6 +290,7 @@ def summarize_run(run_dir: str | Path) -> dict:
         "ci_weights.json",
         "correlation_report.json",
         "pair_correlation_report.json",
+        "hubbard_report.json",
     ]:
         path = run_dir / "reports" / name
         if path.exists():

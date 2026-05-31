@@ -69,13 +69,15 @@ results/<experiment>/<timestamp>_<name>_k<K>_m<M>_s<seed>/
   checkpoints/
 ```
 
-Important pair reports include `pair_energies.json`, `pair_exchange.json`, `density_checks.json`, `ci_weights.json`, and `final_summary.json`.
+Important pair reports include `pair_energies.json`, `pair_exchange.json`, `density_checks.json`, `ci_weights.json`, `hubbard_report.json`, and `final_summary.json`.
 
 `correlation_report.json` adds natural occupations, orbital entropy, CI participation ratio, left/right density integrals, charge-sector probabilities `P_20`, `P_11`, and `P_02`, and heuristic interpretation labels for correlation, CI mixing, and charge regime.
 
 `one_electron_quality.json` records projected Ritz residuals, basis-overlap conditioning, coefficient orthonormality, and energy gaps. `localized_orbitals.json` records the left/right orbitals constructed from the two lowest states.
 
 `pair_correlation_report.json` summarizes the conditional pair-correlation ratio maps saved as `pair_correlation_<sector>.npy`. The `pair_summary_dashboard.png` plot gives a compact single-run diagnostic view.
+
+`hubbard_report.json` reduces the lowest two learned orbitals to approximate two-site Hubbard parameters `t`, `U`, `V`, and exchange `K`, then reports a simple Hubbard singlet/triplet estimate for comparison with the full CI result.
 
 Final orbitals are renormalized on the deterministic grid by default. The before/after norms are recorded in `one_electron_quality.json`. Training summaries report completed steps, configured steps, stop reason, early-stop status, and best eigensum. Entanglement summaries are computed from normalized natural occupations.
 
