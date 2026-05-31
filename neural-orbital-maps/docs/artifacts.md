@@ -38,6 +38,16 @@ Finite-difference pair-CI runs additionally write the standard pair reports usin
 - `correlation_report.json`
 - `pair_correlation_report.json`
 
+Pair-baseline comparison outputs:
+
+```text
+<output-dir>/
+  pair_baseline_comparison.json
+  pair_baseline_comparison.png
+```
+
+The comparison report records neural-orbital pair-CI exchange, finite-difference-orbital pair-CI exchange, absolute error, and relative error to the finite-difference value when defined.
+
 Required pair reports:
 
 - `pair_energies.json`

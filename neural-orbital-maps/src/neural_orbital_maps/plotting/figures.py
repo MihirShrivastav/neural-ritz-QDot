@@ -58,6 +58,22 @@ def hubbard_exchange_comparison(exchange: dict, hubbard: dict, e0_mev: float, pa
     plt.close(fig)
 
 
+def pair_baseline_comparison_plot(report: dict, path: str | Path) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    values = [float(report["neural"]["J_meV"]), float(report["finite_difference"]["J_meV"])]
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.bar(["Neural orbital CI", "FD orbital CI"], values, color=["#315c9f", "#4b8f4a"])
+    ax.set_ylabel("Exchange J (meV)")
+    ax.set_title("Neural vs Finite-Difference Pair-CI Baseline")
+    ax.axhline(0.0, color="black", linewidth=0.8)
+    delta = float(report["difference"]["neural_minus_fd_J_meV"])
+    ax.text(0.5, 0.92, f"Delta J = {delta:.3g} meV", ha="center", va="center", transform=ax.transAxes)
+    fig.tight_layout()
+    fig.savefig(path, dpi=180)
+    plt.close(fig)
+
+
 def difference_plot(a: np.ndarray, b: np.ndarray, x: np.ndarray, y: np.ndarray, title: str, path: str | Path) -> None:
     diff = a - b
     vmax = float(np.max(np.abs(diff))) if diff.size else 1.0
