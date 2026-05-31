@@ -77,6 +77,6 @@ Important pair reports include `pair_energies.json`, `pair_exchange.json`, `dens
 
 `pair_correlation_report.json` summarizes the conditional pair-correlation ratio maps saved as `pair_correlation_<sector>.npy`. The `pair_summary_dashboard.png` plot gives a compact single-run diagnostic view.
 
-Final orbitals are renormalized on the deterministic grid by default. The before/after norms are recorded in `one_electron_quality.json`. Entanglement summaries are computed from normalized natural occupations.
+Final orbitals are renormalized on the deterministic grid by default. The before/after norms are recorded in `one_electron_quality.json`. Training summaries report completed steps, configured steps, stop reason, early-stop status, and best eigensum. Entanglement summaries are computed from normalized natural occupations.
 
 Finite-difference baseline runs write `finite_difference_energies.json`, `fd_orbitals.npy`, `fd_energies.npy`, and density plots. Convergence studies write `points.csv`, `summary.json`, and `plots/one_electron_convergence.png` under `results/<study>/<study-id>/`; when enabled, they include finite-difference reference energies and neural-minus-baseline errors.

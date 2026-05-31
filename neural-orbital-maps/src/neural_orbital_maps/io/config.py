@@ -90,7 +90,9 @@ class TrainingConfig(BaseModel):
     device: str = "cpu"
     early_stop_patience: int = 6
     early_stop_min_delta: float = 1e-5
+    early_stop_relative_delta: float = 0.0
     min_steps_before_early_stop: int = 0
+    fail_on_nonfinite_loss: bool = True
 
     @field_validator("steps", "log_every", "early_stop_patience")
     @classmethod
@@ -111,6 +113,13 @@ class TrainingConfig(BaseModel):
     def positive_lr(cls, value: float) -> float:
         if value <= 0:
             raise ValueError("training.lr must be positive")
+        return value
+
+    @field_validator("early_stop_min_delta", "early_stop_relative_delta")
+    @classmethod
+    def non_negative_float(cls, value: float) -> float:
+        if value < 0:
+            raise ValueError("training early-stop deltas must be non-negative")
         return value
 
 

@@ -27,6 +27,10 @@ class OneElectronResult:
     final_norms_after: np.ndarray
     metrics: list[dict]
     model_state: dict
+    steps_completed: int
+    early_stopped: bool
+    stop_reason: str
+    best_eigsum: float
 
 
 def _dtype(name: str) -> torch.dtype:
@@ -49,8 +53,12 @@ def train_one_electron(config: RunConfig, logger: Logger | None = None) -> OneEl
     metrics: list[dict] = []
     best_loss = float("inf")
     stale = 0
+    steps_completed = 0
+    early_stopped = False
+    stop_reason = "max_steps"
 
     for step in range(1, config.training.steps + 1):
+        steps_completed = step
         optimizer.zero_grad(set_to_none=True)
         points = grid.points.detach().clone().requires_grad_(True)
         potential = evaluate_potential(points, config.potential)
@@ -58,6 +66,8 @@ def train_one_electron(config: RunConfig, logger: Logger | None = None) -> OneEl
         overlap, hamiltonian = assemble_ritz(points, grid.weights, potential, basis)
         vals, _ = solve_generalized(hamiltonian, overlap)
         loss = vals[: config.solver.num_states].sum()
+        if config.training.fail_on_nonfinite_loss and not torch.isfinite(loss):
+            raise RuntimeError(f"non-finite training loss at step {step}: {float(loss.detach().cpu())}")
         loss.backward()
         optimizer.step()
 
@@ -68,15 +78,20 @@ def train_one_electron(config: RunConfig, logger: Logger | None = None) -> OneEl
             if logger:
                 logger.info("step=%s eigsum=%.8f E0=%.8f", step, item["eigsum"], item["E0"])
 
-        if loss_value + config.training.early_stop_min_delta < best_loss:
+        required_delta = config.training.early_stop_min_delta
+        if np.isfinite(best_loss):
+            required_delta = max(required_delta, config.training.early_stop_relative_delta * abs(best_loss))
+        if loss_value + required_delta < best_loss:
             best_loss = loss_value
             stale = 0
         else:
             stale += 1
         min_stop_step = max(config.training.log_every, config.training.min_steps_before_early_stop)
         if stale >= config.training.early_stop_patience and step >= min_stop_step:
+            early_stopped = True
+            stop_reason = "early_stop_patience"
             if logger:
-                logger.info("early stop at step=%s best_eigsum=%.8f", step, best_loss)
+                logger.info("early stop at step=%s best_eigsum=%.8f stale_steps=%s", step, best_loss, stale)
             break
 
     points = grid.points.detach().clone().requires_grad_(True)
@@ -108,4 +123,8 @@ def train_one_electron(config: RunConfig, logger: Logger | None = None) -> OneEl
         final_norms_after=norms_after,
         metrics=metrics,
         model_state={k: v.detach().cpu() for k, v in model.state_dict().items()},
+        steps_completed=steps_completed,
+        early_stopped=early_stopped,
+        stop_reason=stop_reason,
+        best_eigsum=best_loss,
     )

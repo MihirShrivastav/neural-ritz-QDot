@@ -21,6 +21,11 @@ def test_reject_negative_min_stop_steps():
         RunConfig.model_validate({"training": {"min_steps_before_early_stop": -1}})
 
 
+def test_reject_negative_relative_stop_delta():
+    with pytest.raises(ValueError):
+        RunConfig.model_validate({"training": {"early_stop_relative_delta": -0.1}})
+
+
 def test_smoke_convergence_config_loads():
     cfg = load_convergence_study_config("configs/smoke_convergence.yaml")
     assert cfg.grid_points == [8, 10]

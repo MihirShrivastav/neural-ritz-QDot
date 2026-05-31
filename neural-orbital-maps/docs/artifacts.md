@@ -19,6 +19,7 @@ Required one-electron reports:
 - `orthonormality.json`
 - `one_electron_quality.json`
 - `localized_orbitals.json`
+- `training_metrics.json`
 - `final_summary.json`
 
 Finite-difference baseline reports:
@@ -38,6 +39,8 @@ Required pair reports:
 - `final_summary.json`
 
 `correlation_report.json` includes normalized natural-occupation entropy, linear entropy, effective orbital count, dominant occupation fraction, charge-sector probabilities, left/right density integrals, and heuristic interpretation labels. The labels are run-triage aids, not calibrated physical phase boundaries.
+
+`training_metrics.json` includes logged eigsum/E0 history and `training_status` with completed steps, configured steps, early-stop flag, stop reason, and best eigsum. `final_summary.json` repeats the training status for one-electron and pair-CI runs.
 
 Important one-electron arrays:
 

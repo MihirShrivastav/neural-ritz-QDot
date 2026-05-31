@@ -23,6 +23,16 @@ def _material_dict(config: RunConfig) -> dict:
     return config.material.model_dump()
 
 
+def _training_status(result: OneElectronResult, configured_steps: int) -> dict:
+    return {
+        "steps_completed": result.steps_completed,
+        "configured_steps": configured_steps,
+        "early_stopped": result.early_stopped,
+        "stop_reason": result.stop_reason,
+        "best_eigsum": result.best_eigsum,
+    }
+
+
 def _save_one_electron(paths: RunPaths, config: RunConfig, result: OneElectronResult) -> None:
     x = result.grid.x
     y = result.grid.y
@@ -61,7 +71,7 @@ def _save_one_electron(paths: RunPaths, config: RunConfig, result: OneElectronRe
         save_arrays(paths.arrays, localized_orbital_left=localized["left"], localized_orbital_right=localized["right"])
         field_plot(localized["left"] ** 2, x, y, "Localized Left Orbital Density", "|phi_L|^2", paths.plots / "localized_orbital_left.png")
         field_plot(localized["right"] ** 2, x, y, "Localized Right Orbital Density", "|phi_R|^2", paths.plots / "localized_orbital_right.png")
-    save_json(paths.reports / "training_metrics.json", {"metrics": result.metrics})
+    save_json(paths.reports / "training_metrics.json", {"metrics": result.metrics, "training_status": _training_status(result, config.training.steps)})
     torch.save(result.model_state, paths.checkpoints / "model_final.pt")
     field_plot(result.potential, x, y, "Potential", "V(x,y)", paths.plots / "potential.png")
     for idx, orbital in enumerate(result.orbitals):
@@ -84,6 +94,7 @@ def run_one_electron(config: RunConfig) -> Path:
                 "run_dir": str(paths.run_dir),
                 "duration_sec": time.time() - start,
                 "num_states": config.solver.num_states,
+                "training_status": _training_status(result, config.training.steps),
             },
         )
         finalize_run(paths, "completed")
@@ -247,6 +258,7 @@ def run_pair_ci(config: RunConfig) -> Path:
                 "run_dir": str(paths.run_dir),
                 "duration_sec": time.time() - start,
                 "exchange": exchange,
+                "training_status": _training_status(result, config.training.steps),
             },
         )
         finalize_run(paths, "completed")
