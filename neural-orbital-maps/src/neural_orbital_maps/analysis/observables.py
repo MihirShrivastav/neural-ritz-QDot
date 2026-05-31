@@ -48,6 +48,27 @@ def orbital_entropy(occupations: np.ndarray) -> float:
     return float(-np.sum(probs * np.log(probs)))
 
 
+def entanglement_summary(occupations: np.ndarray) -> dict:
+    total = float(np.sum(occupations))
+    if total <= 0:
+        return {
+            "normalized_entropy": 0.0,
+            "linear_entropy": 0.0,
+            "effective_orbital_count": 0.0,
+            "dominant_occupation_fraction": 0.0,
+        }
+    probs = np.clip(occupations / total, 1e-15, 1.0)
+    entropy = float(-np.sum(probs * np.log(probs)))
+    max_entropy = float(np.log(len(probs))) if len(probs) > 1 else 1.0
+    purity = float(np.sum(probs * probs))
+    return {
+        "normalized_entropy": entropy / max_entropy if max_entropy > 0 else 0.0,
+        "linear_entropy": 1.0 - purity,
+        "effective_orbital_count": 1.0 / purity if purity > 0 else 0.0,
+        "dominant_occupation_fraction": float(np.max(probs)),
+    }
+
+
 def ci_participation_ratio(pair: PairResult, sector: str, state_index: int = 0) -> float:
     coeff = pair.sector_coeffs[sector][:, state_index]
     weights = coeff * coeff
@@ -240,6 +261,7 @@ def correlation_report(pair: PairResult, x: np.ndarray, cell_area: float, orbita
         sector_report = {
             "natural_occupations": occ.tolist(),
             "orbital_entropy": orbital_entropy(occ),
+            "entanglement": entanglement_summary(occ),
             "ci_participation_ratio": ci_participation_ratio(pair, sector),
             "left_right_density": left_right_density_report(density, x, cell_area),
         }

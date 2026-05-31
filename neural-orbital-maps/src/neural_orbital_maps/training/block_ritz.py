@@ -23,6 +23,8 @@ class OneElectronResult:
     hamiltonian: np.ndarray
     coefficients: np.ndarray
     projected_residuals: np.ndarray
+    final_norms_before: np.ndarray
+    final_norms_after: np.ndarray
     metrics: list[dict]
     model_state: dict
 
@@ -71,7 +73,8 @@ def train_one_electron(config: RunConfig, logger: Logger | None = None) -> OneEl
             stale = 0
         else:
             stale += 1
-        if stale >= config.training.early_stop_patience and step >= config.training.log_every:
+        min_stop_step = max(config.training.log_every, config.training.min_steps_before_early_stop)
+        if stale >= config.training.early_stop_patience and step >= min_stop_step:
             if logger:
                 logger.info("early stop at step=%s best_eigsum=%.8f", step, best_loss)
             break
@@ -85,6 +88,13 @@ def train_one_electron(config: RunConfig, logger: Logger | None = None) -> OneEl
     projected_residuals = hamiltonian @ coeffs[:, : config.solver.num_states] - overlap @ coeffs[:, : config.solver.num_states] @ torch.diag(vals[: config.solver.num_states])
     shape = config.domain.num_points
     orbitals = psi.detach().cpu().numpy().T.reshape(config.solver.num_states, shape, shape)
+    cell_area = grid.cell_area
+    norms_before = np.asarray([float(np.sum(orbital * orbital) * cell_area) for orbital in orbitals])
+    if config.solver.renormalize_final_orbitals:
+        for idx, norm in enumerate(norms_before):
+            if norm > 0:
+                orbitals[idx] = orbitals[idx] / np.sqrt(norm)
+    norms_after = np.asarray([float(np.sum(orbital * orbital) * cell_area) for orbital in orbitals])
     return OneElectronResult(
         grid=grid,
         potential=potential_t.detach().cpu().numpy().reshape(shape, shape),
@@ -94,6 +104,8 @@ def train_one_electron(config: RunConfig, logger: Logger | None = None) -> OneEl
         hamiltonian=hamiltonian.detach().cpu().numpy(),
         coefficients=coeffs[:, : config.solver.num_states].detach().cpu().numpy(),
         projected_residuals=torch.linalg.norm(projected_residuals, dim=0).detach().cpu().numpy(),
+        final_norms_before=norms_before,
+        final_norms_after=norms_after,
         metrics=metrics,
         model_state={k: v.detach().cpu() for k, v in model.state_dict().items()},
     )

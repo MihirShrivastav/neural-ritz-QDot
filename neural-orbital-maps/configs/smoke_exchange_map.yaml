@@ -33,6 +33,7 @@ base_config:
     hidden_dim: 12
     hidden_layers: 1
     envelope_alpha: 0.12
+    renormalize_final_orbitals: true
   training:
     steps: 2
     lr: 0.0005
@@ -42,6 +43,7 @@ base_config:
     device: cpu
     early_stop_patience: 5
     early_stop_min_delta: 0.000001
+    min_steps_before_early_stop: 0
   pair:
     enabled: true
     num_orbitals: 3

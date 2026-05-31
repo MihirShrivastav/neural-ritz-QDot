@@ -26,3 +26,12 @@ J = E_triplet_0 - E_singlet_0.
 ```
 
 Limitations: no magnetic field, no spin-orbit coupling, no valley physics, no finite-temperature occupations, no time dynamics, and no more than two electrons.
+
+Analysis metrics:
+
+- one-body natural occupations from the CI one-body reduced density matrix,
+- normalized natural-occupation entropy,
+- linear entropy,
+- effective orbital count,
+- charge-sector probabilities from left/right spatial projectors,
+- conditional pair-correlation ratio maps.

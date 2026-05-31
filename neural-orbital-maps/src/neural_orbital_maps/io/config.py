@@ -63,6 +63,7 @@ class SolverConfig(BaseModel):
     hidden_dim: int = 48
     hidden_layers: int = 2
     envelope_alpha: float = 0.12
+    renormalize_final_orbitals: bool = True
 
     @field_validator("num_states", "basis_size", "hidden_dim", "hidden_layers")
     @classmethod
@@ -89,12 +90,20 @@ class TrainingConfig(BaseModel):
     device: str = "cpu"
     early_stop_patience: int = 6
     early_stop_min_delta: float = 1e-5
+    min_steps_before_early_stop: int = 0
 
     @field_validator("steps", "log_every", "early_stop_patience")
     @classmethod
     def positive_int(cls, value: int) -> int:
         if value <= 0:
             raise ValueError("training integer parameters must be positive")
+        return value
+
+    @field_validator("min_steps_before_early_stop")
+    @classmethod
+    def non_negative_int(cls, value: int) -> int:
+        if value < 0:
+            raise ValueError("training.min_steps_before_early_stop must be non-negative")
         return value
 
     @field_validator("lr")

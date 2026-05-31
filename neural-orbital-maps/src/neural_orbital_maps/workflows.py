@@ -44,7 +44,15 @@ def _save_one_electron(paths: RunPaths, config: RunConfig, result: OneElectronRe
     save_json(paths.reports / "orthonormality.json", orthonormality_report(result.orbitals, result.grid.cell_area))
     save_json(
         paths.reports / "one_electron_quality.json",
-        one_electron_quality_report(result.overlap, result.hamiltonian, result.coefficients, result.energies, result.projected_residuals),
+        one_electron_quality_report(
+            result.overlap,
+            result.hamiltonian,
+            result.coefficients,
+            result.energies,
+            result.projected_residuals,
+            result.final_norms_before,
+            result.final_norms_after,
+        ),
     )
     localized, localized_report = localized_orbitals_from_lowest_pair(result.orbitals, x, result.grid.cell_area)
     save_json(paths.reports / "localized_orbitals.json", localized_report)

@@ -31,6 +31,8 @@ Status legend:
 | `done` | One-electron quality report | Added projected Ritz residuals, basis-overlap conditioning, coefficient orthonormality diagnostics, and energy gaps. |
 | `done` | Pair-correlation diagnostics | Added conditional pair-correlation ratio maps, reports, arrays, and plots. |
 | `done` | Pair summary dashboard | Added compact multi-panel dashboard with potential, singlet density, triplet density, and pair correlation. |
+| `done` | Natural-occupation entanglement summaries | Added normalized entropy, linear entropy, effective orbital count, and dominant occupation fraction. |
+| `done` | Final-grid orbital normalization | Added configurable final orbital renormalization and before/after norm reporting. |
 | `done` | Post-run analyzer | `nom-analyze-run` summarizes final, energy, exchange, density, CI, and correlation reports. |
 | `done` | Exchange-map runner | `nom-exchange-map` sweeps detuning/barrier, runs pair CI at each point, writes `points.csv`, map arrays, map plots, and summary. |
 | `done` | Exchange sensitivity maps | Added finite-difference `dJ/detuning`, `dJ/dbarrier`, and sensitivity norm maps. |
@@ -40,16 +42,16 @@ Status legend:
 | `done` | Future schema stub | Added `configs/exchange_map_stub.yaml` documenting intended future map schema. |
 | `done` | Documentation | Added README plus docs for physics model, architecture, artifact contract, and research roadmap. |
 | `done` | Test coverage | Added tests for config validation, units, grid, Ritz assembly, pair CI, observables, CLI workflow, and exchange-map workflow. |
-| `done` | Verification | Verified `pytest` passes with 16 tests; verified `nom-pair-ci`, `nom-one-electron`, `nom-analyze-run`, and `nom-exchange-map` smoke paths. |
+| `done` | Verification | Verified `pytest` passes with 18 tests; verified `nom-pair-ci`, `nom-one-electron`, `nom-analyze-run`, and `nom-exchange-map` smoke paths. |
 
 ## In Progress
 
 | Status | Item | Current State | Next Step |
 |---|---|---|---|
 | `in_progress` | Exchange-map framework | Rectangular detuning/barrier sweeps and resume work, but execution is cold-started and serial. | Add parallel execution and warm starts. |
-| `in_progress` | Correlation/entanglement metrics | Natural occupations, entropy, CI PR, left/right integrals, charge sectors, localized orbitals, and pair-correlation maps exist. | Add stronger entanglement metrics and benchmark interpretations. |
+| `in_progress` | Correlation/entanglement metrics | Natural-occupation entropy, linear entropy, effective orbital count, CI PR, charge sectors, localized orbitals, and pair-correlation maps exist. | Add benchmark interpretations and validation examples. |
 | `in_progress` | Plotting | Basic scientific plots and single-run dashboard exist. | Add publication-style sweep comparison plots. |
-| `in_progress` | One-electron solver quality | Thin runnable neural Block-Ritz core plus quality diagnostics exist. | Add convergence checks, final-grid normalization controls, and better early stopping. |
+| `in_progress` | One-electron solver quality | Thin runnable neural Block-Ritz core, quality diagnostics, final normalization, and min-step early stopping guard exist. | Add convergence study automation and stronger stopping criteria. |
 
 ## Planned Next
 
@@ -96,5 +98,5 @@ nom-exchange-map --config configs\smoke_exchange_map.yaml
 Expected current test result:
 
 ```text
-16 passed
+18 passed
 ```

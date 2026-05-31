@@ -3,6 +3,7 @@ import numpy as np
 from neural_orbital_maps.analysis.observables import (
     charge_sector_probabilities,
     correlation_report,
+    entanglement_summary,
     localized_orbitals_from_lowest_pair,
     natural_occupations,
     pair_correlation_map,
@@ -59,7 +60,15 @@ def test_correlation_observables_are_normalized():
     report = correlation_report(result, x, area)
     assert np.isclose(occupations.sum(), 2.0)
     assert report["singlet"]["ci_participation_ratio"] >= 1.0
+    assert 0.0 <= report["singlet"]["entanglement"]["normalized_entropy"] <= 1.0
     assert np.isclose(report["singlet"]["left_right_density"]["total_integral"], 2.0, atol=1e-5)
+
+
+def test_entanglement_summary_bounds():
+    summary = entanglement_summary(np.array([1.0, 1.0, 0.0]))
+    assert 0.0 <= summary["normalized_entropy"] <= 1.0
+    assert summary["effective_orbital_count"] >= 1.0
+    assert 0.0 <= summary["dominant_occupation_fraction"] <= 1.0
 
 
 def test_charge_sector_probabilities_sum_to_one():

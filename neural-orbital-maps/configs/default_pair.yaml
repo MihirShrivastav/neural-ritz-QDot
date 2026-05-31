@@ -22,6 +22,7 @@ solver:
   hidden_dim: 48
   hidden_layers: 2
   envelope_alpha: 0.12
+  renormalize_final_orbitals: true
 training:
   steps: 200
   lr: 0.0005
@@ -31,6 +32,7 @@ training:
   device: cpu
   early_stop_patience: 50
   early_stop_min_delta: 0.000001
+  min_steps_before_early_stop: 50
 pair:
   enabled: true
   num_orbitals: 4

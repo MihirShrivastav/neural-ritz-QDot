@@ -31,6 +31,8 @@ Required pair reports:
 - `pair_correlation_report.json`
 - `final_summary.json`
 
+`correlation_report.json` includes normalized natural-occupation entropy, linear entropy, effective orbital count, dominant occupation fraction, charge-sector probabilities, and left/right density integrals.
+
 Important one-electron arrays:
 
 - `orbitals.npy`

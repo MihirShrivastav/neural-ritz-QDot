@@ -21,7 +21,15 @@ def orthonormality_report(orbitals: np.ndarray, cell_area: float) -> dict:
     }
 
 
-def one_electron_quality_report(overlap: np.ndarray, hamiltonian: np.ndarray, coefficients: np.ndarray, energies: np.ndarray, residuals: np.ndarray) -> dict:
+def one_electron_quality_report(
+    overlap: np.ndarray,
+    hamiltonian: np.ndarray,
+    coefficients: np.ndarray,
+    energies: np.ndarray,
+    residuals: np.ndarray,
+    final_norms_before: np.ndarray,
+    final_norms_after: np.ndarray,
+) -> dict:
     s = torch.tensor(overlap, dtype=torch.float64)
     eigs = torch.linalg.eigvalsh(0.5 * (s + s.T)).numpy()
     del hamiltonian
@@ -43,6 +51,9 @@ def one_electron_quality_report(overlap: np.ndarray, hamiltonian: np.ndarray, co
         "ritz_coeff_overlap_max_offdiag": float(np.max(np.abs(coeff_overlap - np.diag(np.diag(coeff_overlap))))),
         "ritz_coeff_overlap_max_diag_deviation": float(np.max(np.abs(np.diag(coeff_overlap) - 1.0))),
         "energy_gaps_dimless": np.diff(energies).tolist() if len(energies) > 1 else [],
+        "final_orbital_norms_before": final_norms_before.tolist(),
+        "final_orbital_norms_after": final_norms_after.tolist(),
+        "final_orbital_max_norm_deviation_after": float(np.max(np.abs(final_norms_after - 1.0))) if final_norms_after.size else 0.0,
     }
 
 
