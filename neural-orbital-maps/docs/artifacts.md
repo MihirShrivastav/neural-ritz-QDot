@@ -48,6 +48,18 @@ Pair-baseline comparison outputs:
 
 The comparison report records neural-orbital pair-CI exchange, finite-difference-orbital pair-CI exchange, absolute error, and relative error to the finite-difference value when defined.
 
+Controlled pair-baseline benchmark studies write:
+
+```text
+results/pair_baseline_benchmark/<study-id>/
+  base_config.yaml
+  manifest.json
+  runs/<neural-point>/<run-id>/
+  runs/<fd-point>/<run-id>/
+  comparison/pair_baseline_comparison.json
+  comparison/pair_baseline_comparison.png
+```
+
 Required pair reports:
 
 - `pair_energies.json`

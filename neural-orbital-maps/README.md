@@ -48,6 +48,12 @@ To compare a neural pair-CI run against a finite-difference pair-CI run:
 nom-compare-pair-baselines --neural-run results/smoke_pair/<neural-run> --fd-run results/smoke_pair/<fd-run> --output-dir results/comparisons/<comparison-id>
 ```
 
+To run both baselines and comparison in one controlled benchmark folder:
+
+```bash
+nom-pair-baseline-benchmark --config configs/smoke_pair.yaml
+```
+
 For a tiny detuning/barrier exchange map:
 
 ```bash
@@ -101,4 +107,4 @@ Important pair reports include `pair_energies.json`, `pair_exchange.json`, `dens
 
 Final orbitals are renormalized on the deterministic grid by default. The before/after norms are recorded in `one_electron_quality.json`. Training summaries report completed steps, configured steps, stop reason, early-stop status, and best eigensum. Entanglement summaries are computed from normalized natural occupations.
 
-Finite-difference baseline runs write `finite_difference_energies.json`, `fd_orbitals.npy`, `fd_energies.npy`, and density plots. Finite-difference pair-CI runs add the normal pair reports and plots using FD orbitals, which gives an independent exchange baseline for neural-orbital CI. Pair-baseline comparisons write `pair_baseline_comparison.json` and `pair_baseline_comparison.png`. Convergence studies write `points.csv`, `summary.json`, and per-axis convergence plots under `results/<study>/<study-id>/`; when enabled, they include finite-difference reference energies and neural-minus-baseline errors.
+Finite-difference baseline runs write `finite_difference_energies.json`, `fd_orbitals.npy`, `fd_energies.npy`, and density plots. Finite-difference pair-CI runs add the normal pair reports and plots using FD orbitals, which gives an independent exchange baseline for neural-orbital CI. Pair-baseline comparisons write `pair_baseline_comparison.json` and `pair_baseline_comparison.png`; the benchmark runner creates both underlying runs plus the comparison in a single study folder. Convergence studies write `points.csv`, `summary.json`, and per-axis convergence plots under `results/<study>/<study-id>/`; when enabled, they include finite-difference reference energies and neural-minus-baseline errors.

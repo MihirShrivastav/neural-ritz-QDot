@@ -29,6 +29,7 @@ nom-convergence-study = "neural_orbital_maps.cli.convergence_study:main"
 nom-fd-baseline = "neural_orbital_maps.cli.finite_difference:main"
 nom-fd-pair-ci = "neural_orbital_maps.cli.fd_pair_ci:main"
 nom-compare-pair-baselines = "neural_orbital_maps.cli.compare_pair_baselines:main"
+nom-pair-baseline-benchmark = "neural_orbital_maps.cli.pair_baseline_benchmark:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
