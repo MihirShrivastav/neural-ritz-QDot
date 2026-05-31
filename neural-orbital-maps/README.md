@@ -62,3 +62,5 @@ Important pair reports include `pair_energies.json`, `pair_exchange.json`, `dens
 `correlation_report.json` adds natural occupations, orbital entropy, CI participation ratio, left/right density integrals, and charge-sector probabilities `P_20`, `P_11`, and `P_02`.
 
 `one_electron_quality.json` records projected Ritz residuals, basis-overlap conditioning, coefficient orthonormality, and energy gaps. `localized_orbitals.json` records the left/right orbitals constructed from the two lowest states.
+
+`pair_correlation_report.json` summarizes the conditional pair-correlation ratio maps saved as `pair_correlation_<sector>.npy`. The `pair_summary_dashboard.png` plot gives a compact single-run diagnostic view.

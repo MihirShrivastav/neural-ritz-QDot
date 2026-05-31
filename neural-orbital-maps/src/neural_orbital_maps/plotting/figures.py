@@ -70,3 +70,38 @@ def exchange_map(detuning: np.ndarray, barrier: np.ndarray, values: np.ndarray, 
     fig.tight_layout()
     fig.savefig(path, dpi=180)
     plt.close(fig)
+
+
+def pair_summary_dashboard(
+    potential: np.ndarray,
+    singlet_density: np.ndarray | None,
+    triplet_density: np.ndarray | None,
+    correlation: np.ndarray | None,
+    x: np.ndarray,
+    y: np.ndarray,
+    exchange: dict,
+    path: str | Path,
+) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+    panels = [
+        (potential, "Potential", "viridis"),
+        (singlet_density, "Singlet density", "viridis"),
+        (triplet_density, "Triplet density", "viridis"),
+        (correlation, "Pair correlation ratio", "magma"),
+    ]
+    for ax, (field, title, cmap) in zip(axes.ravel(), panels):
+        if field is None or field.size == 0:
+            ax.axis("off")
+            ax.set_title(f"{title}: unavailable")
+            continue
+        im = ax.imshow(field, extent=[x.min(), x.max(), y.min(), y.max()], origin="lower", cmap=cmap)
+        ax.set_title(title)
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    fig.suptitle(f"Pair CI Summary: J = {exchange.get('J_meV', 0.0):.4g} meV")
+    fig.tight_layout()
+    fig.savefig(path, dpi=180)
+    plt.close(fig)

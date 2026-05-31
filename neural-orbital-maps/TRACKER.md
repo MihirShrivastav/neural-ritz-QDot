@@ -29,6 +29,8 @@ Status legend:
 | `done` | Correlation observables | Added natural occupations, orbital entropy, CI participation ratio, and left/right density integrals. |
 | `done` | Localized orbital diagnostics | Added left/right localized orbital construction from the two lowest orbitals, reports, arrays, and plots. |
 | `done` | One-electron quality report | Added projected Ritz residuals, basis-overlap conditioning, coefficient orthonormality diagnostics, and energy gaps. |
+| `done` | Pair-correlation diagnostics | Added conditional pair-correlation ratio maps, reports, arrays, and plots. |
+| `done` | Pair summary dashboard | Added compact multi-panel dashboard with potential, singlet density, triplet density, and pair correlation. |
 | `done` | Post-run analyzer | `nom-analyze-run` summarizes final, energy, exchange, density, CI, and correlation reports. |
 | `done` | Exchange-map runner | `nom-exchange-map` sweeps detuning/barrier, runs pair CI at each point, writes `points.csv`, map arrays, map plots, and summary. |
 | `done` | Exchange sensitivity maps | Added finite-difference `dJ/detuning`, `dJ/dbarrier`, and sensitivity norm maps. |
@@ -38,15 +40,15 @@ Status legend:
 | `done` | Future schema stub | Added `configs/exchange_map_stub.yaml` documenting intended future map schema. |
 | `done` | Documentation | Added README plus docs for physics model, architecture, artifact contract, and research roadmap. |
 | `done` | Test coverage | Added tests for config validation, units, grid, Ritz assembly, pair CI, observables, CLI workflow, and exchange-map workflow. |
-| `done` | Verification | Verified `pytest` passes with 15 tests; verified `nom-pair-ci`, `nom-one-electron`, `nom-analyze-run`, and `nom-exchange-map` smoke paths. |
+| `done` | Verification | Verified `pytest` passes with 16 tests; verified `nom-pair-ci`, `nom-one-electron`, `nom-analyze-run`, and `nom-exchange-map` smoke paths. |
 
 ## In Progress
 
 | Status | Item | Current State | Next Step |
 |---|---|---|---|
 | `in_progress` | Exchange-map framework | Rectangular detuning/barrier sweeps and resume work, but execution is cold-started and serial. | Add parallel execution and warm starts. |
-| `in_progress` | Correlation/entanglement metrics | Natural occupations, entropy, CI PR, left/right integrals, charge sectors, and localized orbital diagnostics exist. | Add pair-correlation functions and stronger entanglement metrics. |
-| `in_progress` | Plotting | Basic scientific plots exist. | Add publication-style multi-panel figures and sweep comparison plots. |
+| `in_progress` | Correlation/entanglement metrics | Natural occupations, entropy, CI PR, left/right integrals, charge sectors, localized orbitals, and pair-correlation maps exist. | Add stronger entanglement metrics and benchmark interpretations. |
+| `in_progress` | Plotting | Basic scientific plots and single-run dashboard exist. | Add publication-style sweep comparison plots. |
 | `in_progress` | One-electron solver quality | Thin runnable neural Block-Ritz core plus quality diagnostics exist. | Add convergence checks, final-grid normalization controls, and better early stopping. |
 
 ## Planned Next
@@ -56,7 +58,6 @@ Status legend:
 | `planned` | Parallel sweep execution | Add configurable worker count for independent sweep points. |
 | `planned` | Warm-start continuation | Allow each sweep point to initialize from a nearby completed checkpoint; add state-overlap alignment. |
 | `planned` | Orbital alignment | Track orbital signs/order across parameter sweeps using overlap matrices. |
-| `planned` | Pair-correlation function | Add `g(r1,r2)`/exchange-hole style reports and plots. |
 | `planned` | Disorder generators | Add Gaussian random field, impurity, barrier disorder, and detuning-bias disorder. |
 | `planned` | Disorder ensemble runner | Run many disorder realizations and report mean/std/quantiles of `J`, sensitivity, and sweet-spot shifts. |
 | `planned` | Noise-aware sweet-spot score | Combine `J`, gradients, and gate-noise covariance into a quality metric. |
@@ -95,5 +96,5 @@ nom-exchange-map --config configs\smoke_exchange_map.yaml
 Expected current test result:
 
 ```text
-15 passed
+16 passed
 ```

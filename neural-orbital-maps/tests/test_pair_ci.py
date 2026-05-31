@@ -1,6 +1,12 @@
 import numpy as np
 
-from neural_orbital_maps.analysis.observables import charge_sector_probabilities, correlation_report, localized_orbitals_from_lowest_pair, natural_occupations
+from neural_orbital_maps.analysis.observables import (
+    charge_sector_probabilities,
+    correlation_report,
+    localized_orbitals_from_lowest_pair,
+    natural_occupations,
+    pair_correlation_map,
+)
 from neural_orbital_maps.numerics.pair_ci import build_coulomb_tensor, build_sector_basis, solve_pair_ci
 
 
@@ -73,3 +79,12 @@ def test_localized_orbitals_are_reported_and_normalized():
     assert np.isclose(np.sum(localized["right"] ** 2) * area, 1.0)
     assert report["localization_score"] >= 0.0
     assert np.isfinite(report["overlap"])
+
+
+def test_pair_correlation_map_has_normalized_conditional_density():
+    orbitals, x, y, area = _toy_orbitals()
+    result = solve_pair_ci(orbitals, np.array([1.0, 2.0, 4.0]), x, y, {"m_eff": 0.067, "epsilon_r": 12.9, "L0_nm": 30.0}, 3, ["singlet"], "zero", 0.05)
+    ratio, report = pair_correlation_map(orbitals, result, "singlet", result.one_body_densities["singlet"], area)
+    assert ratio.shape == orbitals.shape[1:]
+    assert np.isclose(report["conditional_integral"], 1.0)
+    assert report["ratio_max"] >= report["ratio_min"]

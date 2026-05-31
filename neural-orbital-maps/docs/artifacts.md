@@ -28,6 +28,7 @@ Required pair reports:
 - `density_checks.json`
 - `ci_weights.json`
 - `correlation_report.json`
+- `pair_correlation_report.json`
 - `final_summary.json`
 
 Important one-electron arrays:
@@ -37,6 +38,15 @@ Important one-electron arrays:
 - `ritz_coefficients.npy`
 - `localized_orbital_left.npy`
 - `localized_orbital_right.npy`
+
+Important pair arrays:
+
+- `one_body_density_singlet.npy`
+- `one_body_density_triplet.npy`
+- `conditional_density_singlet.npy`
+- `conditional_density_triplet.npy`
+- `pair_correlation_singlet.npy`
+- `pair_correlation_triplet.npy`
 
 Exchange-map studies write:
 

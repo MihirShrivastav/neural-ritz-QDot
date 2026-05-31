@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from neural_orbital_maps.analysis.observables import conditional_density, correlation_report, localized_orbitals_from_lowest_pair
+from neural_orbital_maps.analysis.observables import conditional_density, correlation_report, localized_orbitals_from_lowest_pair, pair_correlation_map
 from neural_orbital_maps.analysis.reports import ci_weights, density_checks, exchange_report, one_electron_quality_report, orthonormality_report
 from neural_orbital_maps.io.artifacts import load_json, save_arrays, save_json
 from neural_orbital_maps.io.config import RunConfig
@@ -14,7 +14,7 @@ from neural_orbital_maps.io.logging import build_logger
 from neural_orbital_maps.io.runs import RunPaths, create_run, finalize_run
 from neural_orbital_maps.numerics.pair_ci import solve_pair_ci
 from neural_orbital_maps.physics.units import energy_scale_meV
-from neural_orbital_maps.plotting.figures import difference_plot, exchange_bar, field_plot
+from neural_orbital_maps.plotting.figures import difference_plot, exchange_bar, field_plot, pair_summary_dashboard
 from neural_orbital_maps.training.block_ritz import OneElectronResult, train_one_electron
 
 
@@ -131,6 +131,13 @@ def run_pair_ci(config: RunConfig) -> Path:
         for sector in pair.sector_energies:
             conditional_arrays[f"conditional_density_{sector}"] = conditional_density(result.orbitals[: config.pair.num_orbitals], pair, sector)
         save_arrays(paths.arrays, **conditional_arrays)
+        pair_correlation_arrays = {}
+        pair_correlation_reports = {}
+        for sector, density in pair.one_body_densities.items():
+            ratio, report = pair_correlation_map(result.orbitals[: config.pair.num_orbitals], pair, sector, density, result.grid.cell_area)
+            pair_correlation_arrays[f"pair_correlation_{sector}"] = ratio
+            pair_correlation_reports[sector] = report
+        save_arrays(paths.arrays, **pair_correlation_arrays)
         save_json(paths.reports / "pair_energies.json", pair_energy_payload)
         save_json(paths.reports / "pair_exchange.json", exchange)
         save_json(paths.reports / "density_checks.json", density_checks(pair, result.grid.cell_area))
@@ -139,10 +146,13 @@ def run_pair_ci(config: RunConfig) -> Path:
             paths.reports / "correlation_report.json",
             correlation_report(pair, result.grid.x, result.grid.cell_area, result.orbitals[: config.pair.num_orbitals]),
         )
+        save_json(paths.reports / "pair_correlation_report.json", pair_correlation_reports)
         for sector, density in pair.one_body_densities.items():
             field_plot(density, result.grid.x, result.grid.y, f"{sector.title()} One-Body Density", "rho(x,y)", paths.plots / f"one_body_density_{sector}.png")
         for sector, density in conditional_arrays.items():
             field_plot(density, result.grid.x, result.grid.y, sector.replace("_", " ").title(), "P(r2 | r1)", paths.plots / f"{sector}.png")
+        for sector, ratio in pair_correlation_arrays.items():
+            field_plot(ratio, result.grid.x, result.grid.y, sector.replace("_", " ").title(), "g(r2 | r1)", paths.plots / f"{sector}.png")
         if "singlet" in pair.one_body_densities and "triplet" in pair.one_body_densities:
             difference_plot(
                 pair.one_body_densities["singlet"],
@@ -153,6 +163,16 @@ def run_pair_ci(config: RunConfig) -> Path:
                 paths.plots / "one_body_density_difference.png",
             )
         exchange_bar(exchange, paths.plots / "exchange_summary.png")
+        pair_summary_dashboard(
+            result.potential,
+            pair.one_body_densities.get("singlet"),
+            pair.one_body_densities.get("triplet"),
+            pair_correlation_arrays.get("pair_correlation_singlet"),
+            result.grid.x,
+            result.grid.y,
+            exchange,
+            paths.plots / "pair_summary_dashboard.png",
+        )
         save_json(
             paths.reports / "final_summary.json",
             {
@@ -184,6 +204,7 @@ def summarize_run(run_dir: str | Path) -> dict:
         "density_checks.json",
         "ci_weights.json",
         "correlation_report.json",
+        "pair_correlation_report.json",
     ]:
         path = run_dir / "reports" / name
         if path.exists():

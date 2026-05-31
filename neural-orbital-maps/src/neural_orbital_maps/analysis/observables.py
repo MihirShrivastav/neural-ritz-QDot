@@ -187,6 +187,52 @@ def conditional_density(
     return density / norm if norm > 0 else density
 
 
+def pair_probability_slice(
+    orbitals: np.ndarray,
+    pair: PairResult,
+    sector: str,
+    anchor_index: tuple[int, int] | None = None,
+    state_index: int = 0,
+) -> np.ndarray:
+    """Return unnormalized P(r2 | fixed r1 index) from the two-body wavefunction."""
+    p, n, _ = orbitals.shape
+    if anchor_index is None:
+        anchor_index = (n // 2, n // 4)
+    ay, ax = anchor_index
+    basis = pair.sector_bases[sector]
+    coeff = pair.sector_coeffs[sector][:, state_index]
+    amplitude = expand_sector_coefficients(basis, coeff)
+    psi_slice = np.zeros((n, n), dtype=float)
+    for i in range(p):
+        for j in range(p):
+            psi_slice += amplitude[i * p + j] * orbitals[i, ay, ax] * orbitals[j]
+    return psi_slice * psi_slice
+
+
+def pair_correlation_map(
+    orbitals: np.ndarray,
+    pair: PairResult,
+    sector: str,
+    one_body_density: np.ndarray,
+    cell_area: float,
+    anchor_index: tuple[int, int] | None = None,
+    state_index: int = 0,
+) -> tuple[np.ndarray, dict]:
+    """Compute a normalized conditional pair map and a density-ratio correlation map."""
+    raw = pair_probability_slice(orbitals, pair, sector, anchor_index, state_index)
+    raw_integral = float(np.sum(raw) * cell_area)
+    conditional = raw / raw_integral if raw_integral > 0 else raw
+    mean_one_electron_density = np.maximum(one_body_density / 2.0, 1e-15)
+    ratio = conditional / mean_one_electron_density
+    report = {
+        "conditional_integral": float(np.sum(conditional) * cell_area),
+        "ratio_min": float(np.min(ratio)),
+        "ratio_max": float(np.max(ratio)),
+        "ratio_mean": float(np.mean(ratio)),
+    }
+    return ratio, report
+
+
 def correlation_report(pair: PairResult, x: np.ndarray, cell_area: float, orbitals: np.ndarray | None = None) -> dict:
     report = {}
     for sector, density in pair.one_body_densities.items():
