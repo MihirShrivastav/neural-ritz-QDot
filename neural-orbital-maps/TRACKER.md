@@ -26,9 +26,12 @@ Status legend:
 | `done` | Two-electron CI | Added singlet/triplet sector basis construction, Coulomb tensor, product Hamiltonian, sector diagonalization, and one-body densities. |
 | `done` | Pair reports | Added `pair_energies.json`, `pair_exchange.json`, `density_checks.json`, `ci_weights.json`, and `final_summary.json`. |
 | `done` | Pair plots | Added potential, per-state density, singlet/triplet one-body density, conditional density, exchange summary, and singlet-triplet density-difference plots. |
+| `done` | Plotting framework | Added single-run dashboards, exchange maps, sensitivity maps, convergence plots, CI-vs-Hubbard comparison plots, neural-vs-FD pair baseline plots, controlled benchmark comparison plots, and runtime comparison plots. |
 | `done` | Correlation observables | Added natural occupations, orbital entropy, CI participation ratio, and left/right density integrals. |
+| `done` | Correlation/entanglement framework | Added natural occupations, entropy metrics, effective orbital count, CI PR, charge sectors, localized orbitals, pair-correlation maps, interpretation labels, finite-difference validation support, Hubbard diagnostics, baseline comparison reports, and controlled benchmark runner. |
 | `done` | Localized orbital diagnostics | Added left/right localized orbital construction from the two lowest orbitals, reports, arrays, and plots. |
 | `done` | One-electron quality report | Added projected Ritz residuals, basis-overlap conditioning, coefficient orthonormality diagnostics, and energy gaps. |
+| `done` | One-electron solver-quality framework | Added final normalization, absolute/relative early stopping, non-finite loss guards, grid/basis/hidden-dim/seed convergence automation, finite-difference reference comparisons, controlled pair-baseline benchmark, and runtime reports. |
 | `done` | Training termination diagnostics | Added relative early-stop tolerance, non-finite loss failure guard, and persisted training-stop metadata in metrics/final summaries. |
 | `done` | Pair-correlation diagnostics | Added conditional pair-correlation ratio maps, reports, arrays, and plots. |
 | `done` | Pair summary dashboard | Added compact multi-panel dashboard with potential, singlet density, triplet density, and pair correlation. |
@@ -60,9 +63,6 @@ Status legend:
 | Status | Item | Current State | Next Step |
 |---|---|---|---|
 | `in_progress` | Exchange-map framework | Rectangular detuning/barrier sweeps and resume work, but execution is cold-started and serial. | Add parallel execution and warm starts. |
-| `in_progress` | Correlation/entanglement metrics | Natural-occupation entropy, linear entropy, effective orbital count, CI PR, charge sectors, localized orbitals, pair-correlation maps, heuristic interpretation labels, one-electron and pair-CI finite-difference validation support, Hubbard diagnostics, baseline comparison reports, and controlled benchmark runner exist. | Add disorder-aware validation examples after disorder generators are implemented. |
-| `in_progress` | Plotting | Basic scientific plots, single-run dashboard, exchange maps, sensitivity maps, one-electron convergence plots, CI-vs-Hubbard comparison plots, neural-vs-FD pair baseline plots, and controlled benchmark comparison plots exist. | Add publication-style comparison plots for disorder ensembles after disorder workflows exist. |
-| `in_progress` | One-electron solver quality | Thin runnable neural Block-Ritz core, quality diagnostics, final normalization, absolute/relative early stopping, non-finite loss guards, grid/basis/hidden-dim/seed convergence automation, finite-difference reference comparisons, controlled pair-baseline benchmark, and runtime reports exist. | Add disorder-aware/runtime benchmarks after disorder workflows exist. |
 
 ## Planned Next
 
