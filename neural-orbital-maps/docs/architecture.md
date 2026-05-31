@@ -25,4 +25,6 @@ config -> run directory -> grid/potential -> neural Block-Ritz training
 
 Study runners wrap this single-run flow, vary one controlled parameter set, and collect machine-readable CSV/JSON summaries plus comparison plots.
 
+The finite-difference baseline path solves the same one-electron operator `-Delta + V` with a five-point Dirichlet stencil. It is intentionally separate from the neural trainer so validation can compare independent numerical methods rather than two views of the same implementation.
+
 No code is imported from the parent repository. This project can be moved into a clean repo later.

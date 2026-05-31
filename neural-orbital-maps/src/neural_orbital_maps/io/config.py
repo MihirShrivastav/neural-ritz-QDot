@@ -208,6 +208,7 @@ class ConvergenceStudyConfig(BaseModel):
     results_root: str = "results"
     base_config: RunConfig = Field(default_factory=RunConfig)
     grid_points: list[int] = Field(default_factory=lambda: [16, 24, 32])
+    include_finite_difference: bool = True
 
     @field_validator("grid_points")
     @classmethod

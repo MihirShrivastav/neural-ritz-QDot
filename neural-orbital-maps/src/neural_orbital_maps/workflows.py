@@ -12,6 +12,7 @@ from neural_orbital_maps.io.artifacts import load_json, save_arrays, save_json
 from neural_orbital_maps.io.config import RunConfig
 from neural_orbital_maps.io.logging import build_logger
 from neural_orbital_maps.io.runs import RunPaths, create_run, finalize_run
+from neural_orbital_maps.numerics.finite_difference import FiniteDifferenceResult, solve_finite_difference
 from neural_orbital_maps.numerics.pair_ci import solve_pair_ci
 from neural_orbital_maps.physics.units import energy_scale_meV
 from neural_orbital_maps.plotting.figures import difference_plot, exchange_bar, field_plot, pair_summary_dashboard
@@ -90,6 +91,63 @@ def run_one_electron(config: RunConfig) -> Path:
     except Exception as exc:
         finalize_run(paths, "failed", {"error": str(exc)})
         logger.exception("one-electron run failed")
+        raise
+    return paths.run_dir
+
+
+def _save_finite_difference(paths: RunPaths, config: RunConfig, result: FiniteDifferenceResult) -> None:
+    x = result.grid.x
+    y = result.grid.y
+    e0 = energy_scale_meV(config.material.m_eff, config.material.L0_nm)
+    save_arrays(
+        paths.arrays,
+        grid_x=x,
+        grid_y=y,
+        potential=result.potential,
+        fd_orbitals=result.orbitals,
+        fd_energies=result.energies,
+    )
+    save_json(
+        paths.reports / "finite_difference_energies.json",
+        {
+            "E0_meV": e0,
+            "E_dimless": result.energies.tolist(),
+            "E_meV": (result.energies * e0).tolist(),
+            "operator": "-Delta + V",
+            "boundary_condition": "homogeneous Dirichlet outside the grid",
+            "stencil": "five-point second-order finite difference",
+        },
+    )
+    save_json(paths.reports / "orthonormality.json", orthonormality_report(result.orbitals, result.grid.cell_area))
+    field_plot(result.potential, x, y, "Finite-Difference Potential", "V(x,y)", paths.plots / "potential.png")
+    for idx, orbital in enumerate(result.orbitals):
+        field_plot(orbital**2, x, y, f"FD State {idx} Density", "|psi|^2", paths.plots / f"fd_density_state_{idx}.png")
+
+
+def run_finite_difference_baseline(config: RunConfig) -> Path:
+    start = time.time()
+    paths = create_run(config)
+    logger = build_logger(paths.logs / "run.log")
+    logger.info("starting finite-difference baseline run")
+    try:
+        result = solve_finite_difference(config)
+        _save_finite_difference(paths, config, result)
+        save_json(
+            paths.reports / "final_summary.json",
+            {
+                "status": "completed",
+                "mode": "finite_difference_baseline",
+                "run_dir": str(paths.run_dir),
+                "duration_sec": time.time() - start,
+                "num_states": config.solver.num_states,
+                "ground_energy_dimless": float(result.energies[0]),
+            },
+        )
+        finalize_run(paths, "completed")
+        logger.info("completed finite-difference baseline run at %s", paths.run_dir)
+    except Exception as exc:
+        finalize_run(paths, "failed", {"error": str(exc)})
+        logger.exception("finite-difference baseline run failed")
         raise
     return paths.run_dir
 
@@ -206,6 +264,7 @@ def summarize_run(run_dir: str | Path) -> dict:
     for name in [
         "final_summary.json",
         "one_electron_energies.json",
+        "finite_difference_energies.json",
         "one_electron_quality.json",
         "localized_orbitals.json",
         "pair_exchange.json",

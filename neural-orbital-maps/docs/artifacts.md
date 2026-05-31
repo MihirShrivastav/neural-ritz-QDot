@@ -21,6 +21,12 @@ Required one-electron reports:
 - `localized_orbitals.json`
 - `final_summary.json`
 
+Finite-difference baseline reports:
+
+- `finite_difference_energies.json`
+- `orthonormality.json`
+- `final_summary.json`
+
 Required pair reports:
 
 - `pair_energies.json`
@@ -40,6 +46,11 @@ Important one-electron arrays:
 - `ritz_coefficients.npy`
 - `localized_orbital_left.npy`
 - `localized_orbital_right.npy`
+
+Important finite-difference arrays:
+
+- `fd_orbitals.npy`
+- `fd_energies.npy`
 
 Important pair arrays:
 
@@ -85,4 +96,4 @@ results/<study>/<study-id>/
   points/<point-id>/<run-id>/
 ```
 
-`points.csv` records grid size, ground energy, energy sum, projected residual, basis-overlap condition number, final normalization deviation, and the point run directory.
+`points.csv` records grid size, neural ground energy, neural energy sum, optional finite-difference ground energy, neural-minus-finite-difference ground-energy error, projected residual, basis-overlap condition number, final normalization deviation, and the point run directory.

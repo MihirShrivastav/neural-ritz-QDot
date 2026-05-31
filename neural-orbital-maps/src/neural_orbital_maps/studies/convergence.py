@@ -9,6 +9,7 @@ import numpy as np
 
 from neural_orbital_maps.io.artifacts import load_json, save_json
 from neural_orbital_maps.io.config import ConvergenceStudyConfig, save_config
+from neural_orbital_maps.numerics.finite_difference import solve_finite_difference
 from neural_orbital_maps.plotting.figures import convergence_plot
 from neural_orbital_maps.workflows import run_one_electron
 
@@ -29,6 +30,8 @@ def _write_points(path: Path, rows: list[dict]) -> None:
         "num_points",
         "E0_dimless",
         "energy_sum_dimless",
+        "fd_E0_dimless",
+        "E0_minus_fd_dimless",
         "max_projected_residual",
         "overlap_condition_number",
         "max_final_norm_deviation_after",
@@ -54,6 +57,8 @@ def _summarize(rows: list[dict], duration_sec: float) -> dict:
         ordered = sorted(completed, key=lambda row: int(row["num_points"]))
         e0 = np.array([float(row["E0_dimless"]) for row in ordered], dtype=float)
         residual = np.array([float(row["max_projected_residual"]) for row in ordered], dtype=float)
+        fd_errors = [row.get("E0_minus_fd_dimless", "") for row in ordered]
+        numeric_fd_errors = [float(value) for value in fd_errors if value != ""]
         summary.update(
             {
                 "grid_points": [int(row["num_points"]) for row in ordered],
@@ -62,6 +67,9 @@ def _summarize(rows: list[dict], duration_sec: float) -> dict:
                 "E0_delta_last_previous": float(e0[-1] - e0[-2]) if len(e0) > 1 else 0.0,
                 "max_projected_residual": residual.tolist(),
                 "best_residual": float(np.min(residual)),
+                "finite_difference_enabled": bool(numeric_fd_errors),
+                "E0_minus_fd_dimless": numeric_fd_errors,
+                "max_abs_E0_minus_fd_dimless": float(np.max(np.abs(numeric_fd_errors))) if numeric_fd_errors else None,
             }
         )
     return summary
@@ -80,6 +88,7 @@ def run_convergence_study(config: ConvergenceStudyConfig, study_dir: str | Path 
         {
             "study_name": config.study_name,
             "grid_points": config.grid_points,
+            "include_finite_difference": config.include_finite_difference,
         },
     )
     save_config(config.base_config, study_dir / "base_config.yaml")
@@ -109,6 +118,12 @@ def run_convergence_study(config: ConvergenceStudyConfig, study_dir: str | Path 
                 energies = load_json(Path(run_dir) / "reports" / "one_electron_energies.json")
                 quality = load_json(Path(run_dir) / "reports" / "one_electron_quality.json")
                 residuals = np.array(quality["projected_residual_norms"], dtype=float)
+                fd_e0 = ""
+                e0_minus_fd = ""
+                if config.include_finite_difference:
+                    fd = solve_finite_difference(point_cfg, num_states=1)
+                    fd_e0 = float(fd.energies[0])
+                    e0_minus_fd = float(energies["E_dimless"][0] - fd_e0)
                 rows.append(
                     {
                         "point_id": _point_id(num_points),
@@ -116,6 +131,8 @@ def run_convergence_study(config: ConvergenceStudyConfig, study_dir: str | Path 
                         "num_points": num_points,
                         "E0_dimless": energies["E_dimless"][0],
                         "energy_sum_dimless": float(sum(energies["E_dimless"])),
+                        "fd_E0_dimless": fd_e0,
+                        "E0_minus_fd_dimless": e0_minus_fd,
                         "max_projected_residual": float(np.max(np.abs(residuals))) if residuals.size else 0.0,
                         "overlap_condition_number": quality["basis_overlap_condition"],
                         "max_final_norm_deviation_after": quality["final_orbital_max_norm_deviation_after"],
@@ -131,6 +148,8 @@ def run_convergence_study(config: ConvergenceStudyConfig, study_dir: str | Path 
                         "num_points": num_points,
                         "E0_dimless": "",
                         "energy_sum_dimless": "",
+                        "fd_E0_dimless": "",
+                        "E0_minus_fd_dimless": "",
                         "max_projected_residual": "",
                         "overlap_condition_number": "",
                         "max_final_norm_deviation_after": "",

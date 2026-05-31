@@ -86,7 +86,13 @@ def convergence_plot(rows: list[dict], path: str | Path) -> None:
         xs = np.array([int(row["num_points"]) for row in completed], dtype=float)
         e0 = np.array([float(row["E0_dimless"]) for row in completed], dtype=float)
         residual = np.array([float(row["max_projected_residual"]) for row in completed], dtype=float)
-        axes[0].plot(xs, e0, marker="o", color="#315c9f")
+        axes[0].plot(xs, e0, marker="o", color="#315c9f", label="neural Ritz")
+        fd_rows = [row for row in completed if row.get("fd_E0_dimless") not in ("", None)]
+        if fd_rows:
+            fd_xs = np.array([int(row["num_points"]) for row in fd_rows], dtype=float)
+            fd_e0 = np.array([float(row["fd_E0_dimless"]) for row in fd_rows], dtype=float)
+            axes[0].plot(fd_xs, fd_e0, marker="s", color="#4b8f4a", label="finite difference")
+            axes[0].legend()
         axes[0].set_title("Ground Energy Convergence")
         axes[0].set_xlabel("grid points per axis")
         axes[0].set_ylabel("E0 (dimensionless)")

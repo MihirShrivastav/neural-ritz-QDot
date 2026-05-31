@@ -30,6 +30,12 @@ For a direct one-electron run:
 nom-one-electron --config configs/smoke_pair.yaml
 ```
 
+For a conventional finite-difference one-electron baseline:
+
+```bash
+nom-fd-baseline --config configs/smoke_pair.yaml
+```
+
 For a tiny detuning/barrier exchange map:
 
 ```bash
@@ -73,4 +79,4 @@ Important pair reports include `pair_energies.json`, `pair_exchange.json`, `dens
 
 Final orbitals are renormalized on the deterministic grid by default. The before/after norms are recorded in `one_electron_quality.json`. Entanglement summaries are computed from normalized natural occupations.
 
-Convergence studies write `points.csv`, `summary.json`, and `plots/one_electron_convergence.png` under `results/<study>/<study-id>/`.
+Finite-difference baseline runs write `finite_difference_energies.json`, `fd_orbitals.npy`, `fd_energies.npy`, and density plots. Convergence studies write `points.csv`, `summary.json`, and `plots/one_electron_convergence.png` under `results/<study>/<study-id>/`; when enabled, they include finite-difference reference energies and neural-minus-baseline errors.

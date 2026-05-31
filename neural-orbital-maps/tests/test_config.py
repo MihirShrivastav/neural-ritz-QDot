@@ -25,6 +25,7 @@ def test_smoke_convergence_config_loads():
     cfg = load_convergence_study_config("configs/smoke_convergence.yaml")
     assert cfg.grid_points == [8, 10]
     assert cfg.base_config.pair.enabled is False
+    assert cfg.include_finite_difference is True
 
 
 def test_reject_duplicate_convergence_grid_points():

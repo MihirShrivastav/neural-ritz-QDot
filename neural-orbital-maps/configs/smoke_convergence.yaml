@@ -1,6 +1,7 @@
 study_name: smoke_convergence
 results_root: results
 grid_points: [8, 10]
+include_finite_difference: true
 base_config:
   experiment_name: convergence_point
   results_root: results
