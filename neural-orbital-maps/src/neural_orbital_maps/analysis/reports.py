@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import torch
 
 from neural_orbital_maps.numerics.pair_ci import PairResult
 from neural_orbital_maps.physics.units import energy_scale_meV
@@ -17,6 +18,31 @@ def orthonormality_report(orbitals: np.ndarray, cell_area: float) -> dict:
         "weighted_overlap_matrix": overlap.tolist(),
         "max_abs_offdiag": float(np.max(np.abs(overlap - np.diag(np.diag(overlap))))),
         "max_diag_deviation_from_1": float(np.max(np.abs(np.diag(overlap) - 1.0))),
+    }
+
+
+def one_electron_quality_report(overlap: np.ndarray, hamiltonian: np.ndarray, coefficients: np.ndarray, energies: np.ndarray, residuals: np.ndarray) -> dict:
+    s = torch.tensor(overlap, dtype=torch.float64)
+    eigs = torch.linalg.eigvalsh(0.5 * (s + s.T)).numpy()
+    del hamiltonian
+    k = coefficients.shape[1]
+    coeff_overlap = np.zeros((k, k), dtype=float)
+    for i in range(k):
+        for j in range(k):
+            total = 0.0
+            for a in range(coefficients.shape[0]):
+                for b in range(coefficients.shape[0]):
+                    total += coefficients[a, i] * overlap[a, b] * coefficients[b, j]
+            coeff_overlap[i, j] = total
+    return {
+        "basis_overlap_min_eig": float(eigs.min()),
+        "basis_overlap_max_eig": float(eigs.max()),
+        "basis_overlap_condition": float(eigs.max() / max(eigs.min(), 1e-15)),
+        "projected_residual_norms": residuals.tolist(),
+        "max_projected_residual_norm": float(np.max(np.abs(residuals))) if residuals.size else 0.0,
+        "ritz_coeff_overlap_max_offdiag": float(np.max(np.abs(coeff_overlap - np.diag(np.diag(coeff_overlap))))),
+        "ritz_coeff_overlap_max_diag_deviation": float(np.max(np.abs(np.diag(coeff_overlap) - 1.0))),
+        "energy_gaps_dimless": np.diff(energies).tolist() if len(energies) > 1 else [],
     }
 
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-from neural_orbital_maps.analysis.observables import charge_sector_probabilities, correlation_report, natural_occupations
+from neural_orbital_maps.analysis.observables import charge_sector_probabilities, correlation_report, localized_orbitals_from_lowest_pair, natural_occupations
 from neural_orbital_maps.numerics.pair_ci import build_coulomb_tensor, build_sector_basis, solve_pair_ci
 
 
@@ -62,3 +62,14 @@ def test_charge_sector_probabilities_sum_to_one():
     charge = charge_sector_probabilities(orbitals, result, "singlet", x, area)
     assert np.isclose(charge["normalization"], 1.0)
     assert np.isclose(charge["P_20"] + charge["P_11"] + charge["P_02"], 1.0)
+
+
+def test_localized_orbitals_are_reported_and_normalized():
+    orbitals, x, y, area = _toy_orbitals()
+    localized, report = localized_orbitals_from_lowest_pair(orbitals, x, area)
+    assert report["available"] is True
+    assert set(localized) == {"left", "right"}
+    assert np.isclose(np.sum(localized["left"] ** 2) * area, 1.0)
+    assert np.isclose(np.sum(localized["right"] ** 2) * area, 1.0)
+    assert report["localization_score"] >= 0.0
+    assert np.isfinite(report["overlap"])

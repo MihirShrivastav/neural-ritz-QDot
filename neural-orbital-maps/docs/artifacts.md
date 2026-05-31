@@ -17,6 +17,8 @@ Required one-electron reports:
 
 - `one_electron_energies.json`
 - `orthonormality.json`
+- `one_electron_quality.json`
+- `localized_orbitals.json`
 - `final_summary.json`
 
 Required pair reports:
@@ -27,6 +29,14 @@ Required pair reports:
 - `ci_weights.json`
 - `correlation_report.json`
 - `final_summary.json`
+
+Important one-electron arrays:
+
+- `orbitals.npy`
+- `orbital_energies.npy`
+- `ritz_coefficients.npy`
+- `localized_orbital_left.npy`
+- `localized_orbital_right.npy`
 
 Exchange-map studies write:
 

@@ -21,6 +21,8 @@ class OneElectronResult:
     energies: np.ndarray
     overlap: np.ndarray
     hamiltonian: np.ndarray
+    coefficients: np.ndarray
+    projected_residuals: np.ndarray
     metrics: list[dict]
     model_state: dict
 
@@ -80,6 +82,7 @@ def train_one_electron(config: RunConfig, logger: Logger | None = None) -> OneEl
     overlap, hamiltonian = assemble_ritz(points, grid.weights, potential_t, basis)
     vals, coeffs = solve_generalized(hamiltonian, overlap)
     psi = basis @ coeffs[:, : config.solver.num_states]
+    projected_residuals = hamiltonian @ coeffs[:, : config.solver.num_states] - overlap @ coeffs[:, : config.solver.num_states] @ torch.diag(vals[: config.solver.num_states])
     shape = config.domain.num_points
     orbitals = psi.detach().cpu().numpy().T.reshape(config.solver.num_states, shape, shape)
     return OneElectronResult(
@@ -89,6 +92,8 @@ def train_one_electron(config: RunConfig, logger: Logger | None = None) -> OneEl
         energies=vals[: config.solver.num_states].detach().cpu().numpy(),
         overlap=overlap.detach().cpu().numpy(),
         hamiltonian=hamiltonian.detach().cpu().numpy(),
+        coefficients=coeffs[:, : config.solver.num_states].detach().cpu().numpy(),
+        projected_residuals=torch.linalg.norm(projected_residuals, dim=0).detach().cpu().numpy(),
         metrics=metrics,
         model_state={k: v.detach().cpu() for k, v in model.state_dict().items()},
     )

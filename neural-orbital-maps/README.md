@@ -60,3 +60,5 @@ results/<experiment>/<timestamp>_<name>_k<K>_m<M>_s<seed>/
 Important pair reports include `pair_energies.json`, `pair_exchange.json`, `density_checks.json`, `ci_weights.json`, and `final_summary.json`.
 
 `correlation_report.json` adds natural occupations, orbital entropy, CI participation ratio, left/right density integrals, and charge-sector probabilities `P_20`, `P_11`, and `P_02`.
+
+`one_electron_quality.json` records projected Ritz residuals, basis-overlap conditioning, coefficient orthonormality, and energy gaps. `localized_orbitals.json` records the left/right orbitals constructed from the two lowest states.

@@ -6,8 +6,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from neural_orbital_maps.analysis.observables import conditional_density, correlation_report
-from neural_orbital_maps.analysis.reports import ci_weights, density_checks, exchange_report, orthonormality_report
+from neural_orbital_maps.analysis.observables import conditional_density, correlation_report, localized_orbitals_from_lowest_pair
+from neural_orbital_maps.analysis.reports import ci_weights, density_checks, exchange_report, one_electron_quality_report, orthonormality_report
 from neural_orbital_maps.io.artifacts import load_json, save_arrays, save_json
 from neural_orbital_maps.io.config import RunConfig
 from neural_orbital_maps.io.logging import build_logger
@@ -35,12 +35,23 @@ def _save_one_electron(paths: RunPaths, config: RunConfig, result: OneElectronRe
         orbital_energies=result.energies,
         overlap=result.overlap,
         hamiltonian=result.hamiltonian,
+        ritz_coefficients=result.coefficients,
     )
     save_json(
         paths.reports / "one_electron_energies.json",
         {"E0_meV": e0, "E_dimless": result.energies.tolist(), "E_meV": (result.energies * e0).tolist()},
     )
     save_json(paths.reports / "orthonormality.json", orthonormality_report(result.orbitals, result.grid.cell_area))
+    save_json(
+        paths.reports / "one_electron_quality.json",
+        one_electron_quality_report(result.overlap, result.hamiltonian, result.coefficients, result.energies, result.projected_residuals),
+    )
+    localized, localized_report = localized_orbitals_from_lowest_pair(result.orbitals, x, result.grid.cell_area)
+    save_json(paths.reports / "localized_orbitals.json", localized_report)
+    if localized:
+        save_arrays(paths.arrays, localized_orbital_left=localized["left"], localized_orbital_right=localized["right"])
+        field_plot(localized["left"] ** 2, x, y, "Localized Left Orbital Density", "|phi_L|^2", paths.plots / "localized_orbital_left.png")
+        field_plot(localized["right"] ** 2, x, y, "Localized Right Orbital Density", "|phi_R|^2", paths.plots / "localized_orbital_right.png")
     save_json(paths.reports / "training_metrics.json", {"metrics": result.metrics})
     torch.save(result.model_state, paths.checkpoints / "model_final.pt")
     field_plot(result.potential, x, y, "Potential", "V(x,y)", paths.plots / "potential.png")
@@ -164,7 +175,16 @@ def run_pair_ci(config: RunConfig) -> Path:
 def summarize_run(run_dir: str | Path) -> dict:
     run_dir = Path(run_dir)
     summary = {}
-    for name in ["final_summary.json", "one_electron_energies.json", "pair_exchange.json", "density_checks.json", "ci_weights.json", "correlation_report.json"]:
+    for name in [
+        "final_summary.json",
+        "one_electron_energies.json",
+        "one_electron_quality.json",
+        "localized_orbitals.json",
+        "pair_exchange.json",
+        "density_checks.json",
+        "ci_weights.json",
+        "correlation_report.json",
+    ]:
         path = run_dir / "reports" / name
         if path.exists():
             summary[name] = load_json(path)

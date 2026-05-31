@@ -129,6 +129,41 @@ def charge_sector_probabilities(
     }
 
 
+def _normalize_field(field: np.ndarray, cell_area: float) -> np.ndarray:
+    norm = float(np.sqrt(np.sum(field * field) * cell_area))
+    return field / norm if norm > 0 else field
+
+
+def localized_orbitals_from_lowest_pair(orbitals: np.ndarray, x: np.ndarray, cell_area: float, cut: float = 0.0) -> tuple[dict[str, np.ndarray], dict]:
+    """Construct left/right orbitals from the two lowest delocalized states."""
+    if orbitals.shape[0] < 2:
+        return {}, {"available": False, "reason": "at least two orbitals are required"}
+    best = None
+    for sign in (1.0, -1.0):
+        left = _normalize_field((orbitals[0] + sign * orbitals[1]) / np.sqrt(2.0), cell_area)
+        right = _normalize_field((orbitals[0] - sign * orbitals[1]) / np.sqrt(2.0), cell_area)
+        left_report = left_right_density_report(left * left, x, cell_area, cut)
+        right_report = left_right_density_report(right * right, x, cell_area, cut)
+        score = left_report["left_integral"] + right_report["right_integral"]
+        candidate = (score, sign, left, right, left_report, right_report)
+        if best is None or candidate[0] > best[0]:
+            best = candidate
+    assert best is not None
+    _, sign, left, right, left_report, right_report = best
+    overlap = float(np.sum(left * right) * cell_area)
+    report = {
+        "available": True,
+        "construction": "left/right = normalized (psi0 +/- sign psi1) / sqrt(2)",
+        "sign": sign,
+        "cut": cut,
+        "overlap": overlap,
+        "left_orbital": left_report,
+        "right_orbital": right_report,
+        "localization_score": left_report["left_integral"] + right_report["right_integral"],
+    }
+    return {"left": left, "right": right}, report
+
+
 def conditional_density(
     orbitals: np.ndarray,
     pair: PairResult,
