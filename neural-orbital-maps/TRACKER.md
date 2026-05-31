@@ -44,6 +44,7 @@ Status legend:
 | `done` | Baseline-aware convergence summaries | One-electron convergence studies can include finite-difference reference energies and neural-minus-baseline errors. |
 | `done` | Charge-sector probabilities | Added spatial-projector estimates of `P_20`, `P_11`, `P_02`, double occupancy, and charge imbalance. |
 | `done` | Two-site Hubbard diagnostic | Added approximate `t`, `U`, `V`, exchange `K`, and Hubbard singlet/triplet estimate from the lowest localized orbital pair. |
+| `done` | CI-vs-Hubbard comparison plot | Pair runs now plot full CI exchange against the two-site Hubbard estimate. |
 | `done` | Smoke configs | Added `configs/smoke_pair.yaml`, `configs/default_pair.yaml`, `configs/smoke_exchange_map.yaml`, and `configs/smoke_convergence.yaml`. |
 | `done` | Future schema stub | Added `configs/exchange_map_stub.yaml` documenting intended future map schema. |
 | `done` | Documentation | Added README plus docs for physics model, architecture, artifact contract, and research roadmap. |
@@ -55,8 +56,8 @@ Status legend:
 | Status | Item | Current State | Next Step |
 |---|---|---|---|
 | `in_progress` | Exchange-map framework | Rectangular detuning/barrier sweeps and resume work, but execution is cold-started and serial. | Add parallel execution and warm starts. |
-| `in_progress` | Correlation/entanglement metrics | Natural-occupation entropy, linear entropy, effective orbital count, CI PR, charge sectors, localized orbitals, pair-correlation maps, heuristic interpretation labels, one-electron finite-difference validation support, and Hubbard diagnostics exist. | Add explicit CI-vs-Hubbard comparison plots and validation examples. |
-| `in_progress` | Plotting | Basic scientific plots, single-run dashboard, exchange maps, sensitivity maps, and one-electron convergence plots exist. | Add publication-style comparison plots for baselines and disorder ensembles. |
+| `in_progress` | Correlation/entanglement metrics | Natural-occupation entropy, linear entropy, effective orbital count, CI PR, charge sectors, localized orbitals, pair-correlation maps, heuristic interpretation labels, one-electron finite-difference validation support, Hubbard diagnostics, and CI-vs-Hubbard plots exist. | Add benchmark validation examples over controlled parameter sets. |
+| `in_progress` | Plotting | Basic scientific plots, single-run dashboard, exchange maps, sensitivity maps, one-electron convergence plots, and CI-vs-Hubbard comparison plots exist. | Add publication-style comparison plots for disorder ensembles and multi-run baseline studies. |
 | `in_progress` | One-electron solver quality | Thin runnable neural Block-Ritz core, quality diagnostics, final normalization, absolute/relative early stopping, non-finite loss guards, grid convergence automation, and finite-difference reference comparisons exist. | Add expanded convergence axes and pair-CI baseline comparisons. |
 
 ## Planned Next

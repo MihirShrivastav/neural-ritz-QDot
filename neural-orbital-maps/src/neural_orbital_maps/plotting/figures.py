@@ -36,6 +36,28 @@ def exchange_bar(exchange: dict, path: str | Path) -> None:
     plt.close(fig)
 
 
+def hubbard_exchange_comparison(exchange: dict, hubbard: dict, e0_mev: float, path: str | Path) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    ci_j = exchange.get("J_meV")
+    hubbard_j_dimless = hubbard.get("energies_dimless", {}).get("J_hubbard") if hubbard.get("available") else None
+    labels = ["Full CI"]
+    values = [ci_j if ci_j is not None else 0.0]
+    colors = ["#315c9f"]
+    if hubbard_j_dimless is not None:
+        labels.append("Two-site Hubbard")
+        values.append(float(hubbard_j_dimless) * e0_mev)
+        colors.append("#4b8f4a")
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.bar(labels, values, color=colors)
+    ax.set_ylabel("Exchange J (meV)")
+    ax.set_title("CI vs Hubbard Exchange Diagnostic")
+    ax.axhline(0.0, color="black", linewidth=0.8)
+    fig.tight_layout()
+    fig.savefig(path, dpi=160)
+    plt.close(fig)
+
+
 def difference_plot(a: np.ndarray, b: np.ndarray, x: np.ndarray, y: np.ndarray, title: str, path: str | Path) -> None:
     diff = a - b
     vmax = float(np.max(np.abs(diff))) if diff.size else 1.0

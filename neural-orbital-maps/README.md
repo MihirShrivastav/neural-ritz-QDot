@@ -79,6 +79,8 @@ Important pair reports include `pair_energies.json`, `pair_exchange.json`, `dens
 
 `hubbard_report.json` reduces the lowest two learned orbitals to approximate two-site Hubbard parameters `t`, `U`, `V`, and exchange `K`, then reports a simple Hubbard singlet/triplet estimate for comparison with the full CI result.
 
+`hubbard_exchange_comparison.png` plots full CI exchange next to the two-site Hubbard estimate for quick visual triage.
+
 Final orbitals are renormalized on the deterministic grid by default. The before/after norms are recorded in `one_electron_quality.json`. Training summaries report completed steps, configured steps, stop reason, early-stop status, and best eigensum. Entanglement summaries are computed from normalized natural occupations.
 
 Finite-difference baseline runs write `finite_difference_energies.json`, `fd_orbitals.npy`, `fd_energies.npy`, and density plots. Convergence studies write `points.csv`, `summary.json`, and `plots/one_electron_convergence.png` under `results/<study>/<study-id>/`; when enabled, they include finite-difference reference energies and neural-minus-baseline errors.

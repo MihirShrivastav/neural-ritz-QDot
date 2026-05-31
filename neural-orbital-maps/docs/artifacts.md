@@ -43,6 +43,8 @@ Required pair reports:
 
 `hubbard_report.json` includes approximate two-site parameters from the lowest two localized orbitals plus a simple singlet/triplet Hubbard estimate. It is an interpretation and validation diagnostic, not the primary solver output.
 
+`hubbard_exchange_comparison.png` plots full CI exchange against the two-site Hubbard estimate in meV.
+
 `training_metrics.json` includes logged eigsum/E0 history and `training_status` with completed steps, configured steps, early-stop flag, stop reason, and best eigsum. `final_summary.json` repeats the training status for one-electron and pair-CI runs.
 
 Important one-electron arrays:

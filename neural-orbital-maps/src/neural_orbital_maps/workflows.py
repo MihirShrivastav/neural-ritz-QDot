@@ -16,7 +16,7 @@ from neural_orbital_maps.io.runs import RunPaths, create_run, finalize_run
 from neural_orbital_maps.numerics.finite_difference import FiniteDifferenceResult, solve_finite_difference
 from neural_orbital_maps.numerics.pair_ci import solve_pair_ci
 from neural_orbital_maps.physics.units import energy_scale_meV
-from neural_orbital_maps.plotting.figures import difference_plot, exchange_bar, field_plot, pair_summary_dashboard
+from neural_orbital_maps.plotting.figures import difference_plot, exchange_bar, field_plot, hubbard_exchange_comparison, pair_summary_dashboard
 from neural_orbital_maps.training.block_ritz import OneElectronResult, train_one_electron
 
 
@@ -221,9 +221,10 @@ def run_pair_ci(config: RunConfig) -> Path:
         save_json(paths.reports / "density_checks.json", density_checks(pair, result.grid.cell_area))
         save_json(paths.reports / "ci_weights.json", ci_weights(pair))
         _, localized_report = localized_orbitals_from_lowest_pair(result.orbitals[: config.pair.num_orbitals], result.grid.x, result.grid.cell_area)
+        hubbard = two_site_hubbard_report(result.energies[: config.pair.num_orbitals], pair.coulomb_tensor, localized_report.get("sign", 1.0))
         save_json(
             paths.reports / "hubbard_report.json",
-            two_site_hubbard_report(result.energies[: config.pair.num_orbitals], pair.coulomb_tensor, localized_report.get("sign", 1.0)),
+            hubbard,
         )
         save_json(
             paths.reports / "correlation_report.json",
@@ -246,6 +247,7 @@ def run_pair_ci(config: RunConfig) -> Path:
                 paths.plots / "one_body_density_difference.png",
             )
         exchange_bar(exchange, paths.plots / "exchange_summary.png")
+        hubbard_exchange_comparison(exchange, hubbard, e0, paths.plots / "hubbard_exchange_comparison.png")
         pair_summary_dashboard(
             result.potential,
             pair.one_body_densities.get("singlet"),

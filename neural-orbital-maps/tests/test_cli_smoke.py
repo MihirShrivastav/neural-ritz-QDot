@@ -27,4 +27,5 @@ def test_cli_workflow_creates_pair_artifacts(tmp_path):
     assert (run_path / "arrays" / "localized_orbital_left.npy").exists()
     assert (run_path / "arrays" / "pair_correlation_singlet.npy").exists()
     assert (run_path / "plots" / "exchange_summary.png").exists()
+    assert (run_path / "plots" / "hubbard_exchange_comparison.png").exists()
     assert (run_path / "plots" / "pair_summary_dashboard.png").exists()
