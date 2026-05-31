@@ -48,6 +48,12 @@ For a tiny one-electron grid convergence study:
 nom-convergence-study --config configs/smoke_convergence.yaml
 ```
 
+For a tiny non-grid convergence-axis study:
+
+```bash
+nom-convergence-study --config configs/smoke_convergence_axes.yaml
+```
+
 To resume a known study directory:
 
 ```bash
@@ -83,4 +89,4 @@ Important pair reports include `pair_energies.json`, `pair_exchange.json`, `dens
 
 Final orbitals are renormalized on the deterministic grid by default. The before/after norms are recorded in `one_electron_quality.json`. Training summaries report completed steps, configured steps, stop reason, early-stop status, and best eigensum. Entanglement summaries are computed from normalized natural occupations.
 
-Finite-difference baseline runs write `finite_difference_energies.json`, `fd_orbitals.npy`, `fd_energies.npy`, and density plots. Convergence studies write `points.csv`, `summary.json`, and `plots/one_electron_convergence.png` under `results/<study>/<study-id>/`; when enabled, they include finite-difference reference energies and neural-minus-baseline errors.
+Finite-difference baseline runs write `finite_difference_energies.json`, `fd_orbitals.npy`, `fd_energies.npy`, and density plots. Convergence studies write `points.csv`, `summary.json`, and per-axis convergence plots under `results/<study>/<study-id>/`; when enabled, they include finite-difference reference energies and neural-minus-baseline errors.

@@ -104,4 +104,4 @@ results/<study>/<study-id>/
   points/<point-id>/<run-id>/
 ```
 
-`points.csv` records grid size, neural ground energy, neural energy sum, optional finite-difference ground energy, neural-minus-finite-difference ground-energy error, projected residual, basis-overlap condition number, final normalization deviation, and the point run directory.
+`points.csv` records the varied axis, axis value, grid size, basis size, hidden dimension, seed, neural ground energy, neural energy sum, optional finite-difference ground energy, neural-minus-finite-difference ground-energy error, projected residual, basis-overlap condition number, final normalization deviation, and the point run directory. Axis studies write `plots/<axis>_convergence.png`; grid studies also write the backward-compatible `plots/one_electron_convergence.png`.

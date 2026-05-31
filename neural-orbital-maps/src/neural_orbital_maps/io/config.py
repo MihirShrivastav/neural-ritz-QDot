@@ -212,11 +212,28 @@ def load_exchange_map_config(path: str | Path) -> ExchangeMapConfig:
     return ExchangeMapConfig.model_validate(data)
 
 
+class ConvergenceAxisConfig(BaseModel):
+    name: Literal["grid_points", "basis_size", "hidden_dim", "training_seed"]
+    values: list[int]
+
+    @field_validator("values")
+    @classmethod
+    def valid_values(cls, values: list[int]) -> list[int]:
+        if not values:
+            raise ValueError("convergence axis values must not be empty")
+        if any(value <= 0 for value in values):
+            raise ValueError("convergence axis values must be positive")
+        if len(set(values)) != len(values):
+            raise ValueError("convergence axis values must be unique")
+        return values
+
+
 class ConvergenceStudyConfig(BaseModel):
     study_name: str = "one_electron_convergence"
     results_root: str = "results"
     base_config: RunConfig = Field(default_factory=RunConfig)
     grid_points: list[int] = Field(default_factory=lambda: [16, 24, 32])
+    axes: list[ConvergenceAxisConfig] = Field(default_factory=list)
     include_finite_difference: bool = True
 
     @field_validator("grid_points")

@@ -33,6 +33,13 @@ def test_smoke_convergence_config_loads():
     assert cfg.include_finite_difference is True
 
 
+def test_smoke_convergence_axes_config_loads():
+    cfg = load_convergence_study_config("configs/smoke_convergence_axes.yaml")
+    assert cfg.axes[0].name == "basis_size"
+    assert cfg.axes[0].values == [3, 4]
+    assert cfg.include_finite_difference is False
+
+
 def test_reject_duplicate_convergence_grid_points():
     with pytest.raises(ValueError):
         ConvergenceStudyConfig.model_validate({"grid_points": [8, 8]})
