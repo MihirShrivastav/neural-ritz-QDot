@@ -31,7 +31,7 @@ Required pair reports:
 - `pair_correlation_report.json`
 - `final_summary.json`
 
-`correlation_report.json` includes normalized natural-occupation entropy, linear entropy, effective orbital count, dominant occupation fraction, charge-sector probabilities, and left/right density integrals.
+`correlation_report.json` includes normalized natural-occupation entropy, linear entropy, effective orbital count, dominant occupation fraction, charge-sector probabilities, left/right density integrals, and heuristic interpretation labels. The labels are run-triage aids, not calibrated physical phase boundaries.
 
 Important one-electron arrays:
 
@@ -71,3 +71,18 @@ results/<study>/<study-id>/
 ```
 
 `manifest.json` records study status, total points, completed points, failed points, resume mode, and links to summary files.
+
+One-electron convergence studies write:
+
+```text
+results/<study>/<study-id>/
+  study_config.json
+  base_config.yaml
+  manifest.json
+  points.csv
+  plots/one_electron_convergence.png
+  summary.json
+  points/<point-id>/<run-id>/
+```
+
+`points.csv` records grid size, ground energy, energy sum, projected residual, basis-overlap condition number, final normalization deviation, and the point run directory.

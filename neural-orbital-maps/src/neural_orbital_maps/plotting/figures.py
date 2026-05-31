@@ -72,6 +72,35 @@ def exchange_map(detuning: np.ndarray, barrier: np.ndarray, values: np.ndarray, 
     plt.close(fig)
 
 
+def convergence_plot(rows: list[dict], path: str | Path) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    completed = [row for row in rows if row.get("status") == "completed"]
+    completed.sort(key=lambda row: int(row["num_points"]))
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+    if not completed:
+        for ax in axes:
+            ax.axis("off")
+            ax.set_title("No completed points")
+    else:
+        xs = np.array([int(row["num_points"]) for row in completed], dtype=float)
+        e0 = np.array([float(row["E0_dimless"]) for row in completed], dtype=float)
+        residual = np.array([float(row["max_projected_residual"]) for row in completed], dtype=float)
+        axes[0].plot(xs, e0, marker="o", color="#315c9f")
+        axes[0].set_title("Ground Energy Convergence")
+        axes[0].set_xlabel("grid points per axis")
+        axes[0].set_ylabel("E0 (dimensionless)")
+        axes[0].grid(alpha=0.25)
+        axes[1].semilogy(xs, np.maximum(residual, 1e-16), marker="o", color="#b34b3f")
+        axes[1].set_title("Projected Residual")
+        axes[1].set_xlabel("grid points per axis")
+        axes[1].set_ylabel("max residual")
+        axes[1].grid(alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(path, dpi=180)
+    plt.close(fig)
+
+
 def pair_summary_dashboard(
     potential: np.ndarray,
     singlet_density: np.ndarray | None,

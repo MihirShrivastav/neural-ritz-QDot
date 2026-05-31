@@ -32,26 +32,28 @@ Status legend:
 | `done` | Pair-correlation diagnostics | Added conditional pair-correlation ratio maps, reports, arrays, and plots. |
 | `done` | Pair summary dashboard | Added compact multi-panel dashboard with potential, singlet density, triplet density, and pair correlation. |
 | `done` | Natural-occupation entanglement summaries | Added normalized entropy, linear entropy, effective orbital count, and dominant occupation fraction. |
+| `done` | Correlation interpretation labels | Added heuristic correlation, CI-mixing, and charge-regime labels to `correlation_report.json` for run triage. |
 | `done` | Final-grid orbital normalization | Added configurable final orbital renormalization and before/after norm reporting. |
 | `done` | Post-run analyzer | `nom-analyze-run` summarizes final, energy, exchange, density, CI, and correlation reports. |
 | `done` | Exchange-map runner | `nom-exchange-map` sweeps detuning/barrier, runs pair CI at each point, writes `points.csv`, map arrays, map plots, and summary. |
 | `done` | Exchange sensitivity maps | Added finite-difference `dJ/detuning`, `dJ/dbarrier`, and sensitivity norm maps. |
 | `done` | Sweep resume and manifest | Added explicit `--study-dir`, `--no-resume`, reusable `points.csv`, failed-point accounting, and `manifest.json`. |
+| `done` | One-electron convergence study runner | Added `nom-convergence-study`, `configs/smoke_convergence.yaml`, convergence CSV/JSON summaries, and convergence plot. |
 | `done` | Charge-sector probabilities | Added spatial-projector estimates of `P_20`, `P_11`, `P_02`, double occupancy, and charge imbalance. |
-| `done` | Smoke configs | Added `configs/smoke_pair.yaml`, `configs/default_pair.yaml`, and `configs/smoke_exchange_map.yaml`. |
+| `done` | Smoke configs | Added `configs/smoke_pair.yaml`, `configs/default_pair.yaml`, `configs/smoke_exchange_map.yaml`, and `configs/smoke_convergence.yaml`. |
 | `done` | Future schema stub | Added `configs/exchange_map_stub.yaml` documenting intended future map schema. |
 | `done` | Documentation | Added README plus docs for physics model, architecture, artifact contract, and research roadmap. |
-| `done` | Test coverage | Added tests for config validation, units, grid, Ritz assembly, pair CI, observables, CLI workflow, and exchange-map workflow. |
-| `done` | Verification | Verified `pytest` passes with 18 tests; verified `nom-pair-ci`, `nom-one-electron`, `nom-analyze-run`, and `nom-exchange-map` smoke paths. |
+| `done` | Test coverage | Added tests for config validation, units, grid, Ritz assembly, pair CI, observables, CLI workflow, convergence-study workflow, and exchange-map workflow. |
+| `done` | Verification | Verified `pytest` passes with 22 tests; verified `nom-pair-ci`, `nom-one-electron`, `nom-analyze-run`, `nom-exchange-map`, and `nom-convergence-study` smoke paths. |
 
 ## In Progress
 
 | Status | Item | Current State | Next Step |
 |---|---|---|---|
 | `in_progress` | Exchange-map framework | Rectangular detuning/barrier sweeps and resume work, but execution is cold-started and serial. | Add parallel execution and warm starts. |
-| `in_progress` | Correlation/entanglement metrics | Natural-occupation entropy, linear entropy, effective orbital count, CI PR, charge sectors, localized orbitals, and pair-correlation maps exist. | Add benchmark interpretations and validation examples. |
-| `in_progress` | Plotting | Basic scientific plots and single-run dashboard exist. | Add publication-style sweep comparison plots. |
-| `in_progress` | One-electron solver quality | Thin runnable neural Block-Ritz core, quality diagnostics, final normalization, and min-step early stopping guard exist. | Add convergence study automation and stronger stopping criteria. |
+| `in_progress` | Correlation/entanglement metrics | Natural-occupation entropy, linear entropy, effective orbital count, CI PR, charge sectors, localized orbitals, pair-correlation maps, and heuristic interpretation labels exist. | Add validation examples against finite-difference/Hubbard baselines. |
+| `in_progress` | Plotting | Basic scientific plots, single-run dashboard, exchange maps, sensitivity maps, and one-electron convergence plots exist. | Add publication-style comparison plots for baselines and disorder ensembles. |
+| `in_progress` | One-electron solver quality | Thin runnable neural Block-Ritz core, quality diagnostics, final normalization, min-step early stopping guard, and grid convergence study automation exist. | Add stronger stopping criteria and baseline convergence comparisons. |
 
 ## Planned Next
 
@@ -66,7 +68,7 @@ Status legend:
 | `planned` | Imported potential maps | Support `.npy`/`.npz` potential grids with unit metadata. |
 | `planned` | Finite-difference baseline | Add a conventional one-electron finite-difference solver plus the same pair CI for benchmarking. |
 | `planned` | Hubbard baseline | Extract approximate `t`, `U`, `V`, and compare CI exchange against Hubbard estimates. |
-| `planned` | Convergence studies | Add scripts for `num_orbitals`, grid size, Coulomb softening, training seed, and network capacity convergence. |
+| `planned` | Expanded convergence studies | Extend current grid convergence runner to `num_orbitals`, Coulomb softening, training seed, and network capacity convergence. |
 | `planned` | Runtime benchmarks | Compare cold neural runs, warm-started neural runs, and finite-difference baseline runtimes. |
 | `planned` | Paper figure recipes | Add reproducible commands/configs for each expected manuscript figure. |
 
@@ -93,10 +95,11 @@ python -m pip install -e ".[dev]"
 pytest
 nom-pair-ci --config configs\smoke_pair.yaml
 nom-exchange-map --config configs\smoke_exchange_map.yaml
+nom-convergence-study --config configs\smoke_convergence.yaml
 ```
 
 Expected current test result:
 
 ```text
-18 passed
+22 passed
 ```

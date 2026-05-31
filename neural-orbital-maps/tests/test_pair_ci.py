@@ -4,6 +4,7 @@ from neural_orbital_maps.analysis.observables import (
     charge_sector_probabilities,
     correlation_report,
     entanglement_summary,
+    interpret_correlation_sector,
     localized_orbitals_from_lowest_pair,
     natural_occupations,
     pair_correlation_map,
@@ -62,6 +63,7 @@ def test_correlation_observables_are_normalized():
     assert report["singlet"]["ci_participation_ratio"] >= 1.0
     assert 0.0 <= report["singlet"]["entanglement"]["normalized_entropy"] <= 1.0
     assert np.isclose(report["singlet"]["left_right_density"]["total_integral"], 2.0, atol=1e-5)
+    assert "interpretation" in report["singlet"]
 
 
 def test_entanglement_summary_bounds():
@@ -97,3 +99,15 @@ def test_pair_correlation_map_has_normalized_conditional_density():
     assert ratio.shape == orbitals.shape[1:]
     assert np.isclose(report["conditional_integral"], 1.0)
     assert report["ratio_max"] >= report["ratio_min"]
+
+
+def test_correlation_interpretation_labels_regimes():
+    report = {
+        "entanglement": {"normalized_entropy": 0.8, "effective_orbital_count": 3.0},
+        "ci_participation_ratio": 4.5,
+        "charge_sectors": {"P_11": 0.8, "double_occupancy": 0.2},
+    }
+    interpretation = interpret_correlation_sector(report)
+    assert interpretation["correlation_regime"] == "strongly-correlated"
+    assert interpretation["ci_regime"] == "multi-configuration-mixture"
+    assert interpretation["charge_regime"] == "separated-one-electron-per-dot"

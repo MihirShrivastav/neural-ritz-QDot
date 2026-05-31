@@ -1,0 +1,46 @@
+study_name: smoke_convergence
+results_root: results
+grid_points: [8, 10]
+base_config:
+  experiment_name: convergence_point
+  results_root: results
+  material:
+    name: GaAs
+    m_eff: 0.067
+    epsilon_r: 12.9
+    L0_nm: 30.0
+  domain:
+    x_extent: 3.0
+    y_extent: 3.0
+    num_points: 8
+  potential:
+    separation: 1.2
+    barrier: 4.0
+    y_confinement: 3.0
+    detuning: 0.0
+  solver:
+    K: 2
+    M: 3
+    network: siren
+    hidden_dim: 12
+    hidden_layers: 1
+    envelope_alpha: 0.2
+    renormalize_final_orbitals: true
+  training:
+    steps: 2
+    lr: 0.001
+    log_every: 1
+    seed: 123
+    dtype: float64
+    device: cpu
+    early_stop_patience: 4
+    early_stop_min_delta: 0.000001
+    min_steps_before_early_stop: 1
+  pair:
+    enabled: false
+    num_orbitals: 2
+    sectors: [singlet, triplet]
+    coulomb:
+      strength: zero
+      softening: 0.05
+      integration: direct

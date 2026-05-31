@@ -36,6 +36,12 @@ For a tiny detuning/barrier exchange map:
 nom-exchange-map --config configs/smoke_exchange_map.yaml
 ```
 
+For a tiny one-electron grid convergence study:
+
+```bash
+nom-convergence-study --config configs/smoke_convergence.yaml
+```
+
 To resume a known study directory:
 
 ```bash
@@ -59,10 +65,12 @@ results/<experiment>/<timestamp>_<name>_k<K>_m<M>_s<seed>/
 
 Important pair reports include `pair_energies.json`, `pair_exchange.json`, `density_checks.json`, `ci_weights.json`, and `final_summary.json`.
 
-`correlation_report.json` adds natural occupations, orbital entropy, CI participation ratio, left/right density integrals, and charge-sector probabilities `P_20`, `P_11`, and `P_02`.
+`correlation_report.json` adds natural occupations, orbital entropy, CI participation ratio, left/right density integrals, charge-sector probabilities `P_20`, `P_11`, and `P_02`, and heuristic interpretation labels for correlation, CI mixing, and charge regime.
 
 `one_electron_quality.json` records projected Ritz residuals, basis-overlap conditioning, coefficient orthonormality, and energy gaps. `localized_orbitals.json` records the left/right orbitals constructed from the two lowest states.
 
 `pair_correlation_report.json` summarizes the conditional pair-correlation ratio maps saved as `pair_correlation_<sector>.npy`. The `pair_summary_dashboard.png` plot gives a compact single-run diagnostic view.
 
 Final orbitals are renormalized on the deterministic grid by default. The before/after norms are recorded in `one_electron_quality.json`. Entanglement summaries are computed from normalized natural occupations.
+
+Convergence studies write `points.csv`, `summary.json`, and `plots/one_electron_convergence.png` under `results/<study>/<study-id>/`.

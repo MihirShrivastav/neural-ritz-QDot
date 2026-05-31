@@ -201,3 +201,27 @@ def load_exchange_map_config(path: str | Path) -> ExchangeMapConfig:
     with Path(path).open("r", encoding="utf-8") as handle:
         data = yaml.safe_load(handle) or {}
     return ExchangeMapConfig.model_validate(data)
+
+
+class ConvergenceStudyConfig(BaseModel):
+    study_name: str = "one_electron_convergence"
+    results_root: str = "results"
+    base_config: RunConfig = Field(default_factory=RunConfig)
+    grid_points: list[int] = Field(default_factory=lambda: [16, 24, 32])
+
+    @field_validator("grid_points")
+    @classmethod
+    def valid_grid_points(cls, values: list[int]) -> list[int]:
+        if not values:
+            raise ValueError("convergence grid_points must not be empty")
+        if any(value < 8 for value in values):
+            raise ValueError("convergence grid_points entries must be >= 8")
+        if len(set(values)) != len(values):
+            raise ValueError("convergence grid_points entries must be unique")
+        return values
+
+
+def load_convergence_study_config(path: str | Path) -> ConvergenceStudyConfig:
+    with Path(path).open("r", encoding="utf-8") as handle:
+        data = yaml.safe_load(handle) or {}
+    return ConvergenceStudyConfig.model_validate(data)

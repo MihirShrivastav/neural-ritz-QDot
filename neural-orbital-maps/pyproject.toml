@@ -25,6 +25,7 @@ nom-one-electron = "neural_orbital_maps.cli.one_electron:main"
 nom-pair-ci = "neural_orbital_maps.cli.pair_ci:main"
 nom-analyze-run = "neural_orbital_maps.cli.analyze_run:main"
 nom-exchange-map = "neural_orbital_maps.cli.exchange_map:main"
+nom-convergence-study = "neural_orbital_maps.cli.convergence_study:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

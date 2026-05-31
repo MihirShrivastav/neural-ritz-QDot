@@ -1,6 +1,6 @@
 import pytest
 
-from neural_orbital_maps.io.config import RunConfig, load_config
+from neural_orbital_maps.io.config import ConvergenceStudyConfig, RunConfig, load_config, load_convergence_study_config
 
 
 def test_smoke_config_loads():
@@ -19,3 +19,14 @@ def test_reject_pair_orbitals_above_states():
 def test_reject_negative_min_stop_steps():
     with pytest.raises(ValueError):
         RunConfig.model_validate({"training": {"min_steps_before_early_stop": -1}})
+
+
+def test_smoke_convergence_config_loads():
+    cfg = load_convergence_study_config("configs/smoke_convergence.yaml")
+    assert cfg.grid_points == [8, 10]
+    assert cfg.base_config.pair.enabled is False
+
+
+def test_reject_duplicate_convergence_grid_points():
+    with pytest.raises(ValueError):
+        ConvergenceStudyConfig.model_validate({"grid_points": [8, 8]})

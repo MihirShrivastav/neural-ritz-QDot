@@ -254,6 +254,49 @@ def pair_correlation_map(
     return ratio, report
 
 
+def interpret_correlation_sector(sector_report: dict) -> dict:
+    entanglement = sector_report.get("entanglement", {})
+    entropy = float(entanglement.get("normalized_entropy", 0.0))
+    effective_count = float(entanglement.get("effective_orbital_count", 0.0))
+    ci_pr = float(sector_report.get("ci_participation_ratio", 0.0))
+    charge = sector_report.get("charge_sectors", {})
+    p11 = float(charge.get("P_11", 0.0))
+    double_occupancy = float(charge.get("double_occupancy", 0.0))
+
+    if entropy < 0.15 and effective_count < 1.5:
+        correlation_regime = "single-configuration"
+    elif entropy < 0.45:
+        correlation_regime = "moderately-correlated"
+    else:
+        correlation_regime = "strongly-correlated"
+
+    if ci_pr < 1.5:
+        ci_regime = "dominant-ci-vector"
+    elif ci_pr < 4.0:
+        ci_regime = "few-configuration-mixture"
+    else:
+        ci_regime = "multi-configuration-mixture"
+
+    if not charge:
+        charge_regime = "unavailable"
+    elif p11 >= 0.70:
+        charge_regime = "separated-one-electron-per-dot"
+    elif double_occupancy >= 0.55:
+        charge_regime = "double-occupancy-dominated"
+    else:
+        charge_regime = "mixed-charge"
+
+    return {
+        "correlation_regime": correlation_regime,
+        "ci_regime": ci_regime,
+        "charge_regime": charge_regime,
+        "notes": [
+            "Interpretation thresholds are heuristic diagnostics for run triage, not calibrated phase boundaries.",
+            "Use convergence studies and baseline comparisons before assigning physical significance to small differences.",
+        ],
+    }
+
+
 def correlation_report(pair: PairResult, x: np.ndarray, cell_area: float, orbitals: np.ndarray | None = None) -> dict:
     report = {}
     for sector, density in pair.one_body_densities.items():
@@ -267,5 +310,6 @@ def correlation_report(pair: PairResult, x: np.ndarray, cell_area: float, orbita
         }
         if orbitals is not None:
             sector_report["charge_sectors"] = charge_sector_probabilities(orbitals, pair, sector, x, cell_area)
+        sector_report["interpretation"] = interpret_correlation_sector(sector_report)
         report[sector] = sector_report
     return report
