@@ -1,0 +1,64 @@
+import numpy as np
+
+from neural_orbital_maps.analysis.observables import charge_sector_probabilities, correlation_report, natural_occupations
+from neural_orbital_maps.numerics.pair_ci import build_coulomb_tensor, build_sector_basis, solve_pair_ci
+
+
+def _toy_orbitals():
+    xs = np.linspace(-2, 2, 12)
+    ys = np.linspace(-2, 2, 12)
+    x, y = np.meshgrid(xs, ys, indexing="xy")
+    dx = xs[1] - xs[0]
+    dy = ys[1] - ys[0]
+    g0 = np.exp(-((x + 0.7) ** 2 + y**2))
+    g1 = np.exp(-((x - 0.7) ** 2 + y**2))
+    g2 = x * np.exp(-(x**2 + y**2))
+    orbitals = np.stack([g0, g1, g2])
+    for i in range(orbitals.shape[0]):
+        orbitals[i] /= np.sqrt((orbitals[i] ** 2).sum() * dx * dy)
+    return orbitals, x, y, dx * dy
+
+
+def test_sector_basis_dimensions():
+    assert len(build_sector_basis(4, "singlet").orbital_pairs) == 10
+    assert len(build_sector_basis(4, "triplet").orbital_pairs) == 6
+
+
+def test_zero_coulomb_pair_energies_are_orbital_sums():
+    orbitals, x, y, _ = _toy_orbitals()
+    energies = np.array([1.0, 2.0, 4.0])
+    result = solve_pair_ci(orbitals, energies, x, y, {"m_eff": 0.067, "epsilon_r": 12.9, "L0_nm": 30.0}, 3, ["singlet", "triplet"], "zero", 0.05)
+    assert np.isclose(result.sector_energies["singlet"][0], 2.0)
+    assert np.isclose(result.sector_energies["triplet"][0], 3.0)
+
+
+def test_coulomb_tensor_symmetry():
+    orbitals, x, y, _ = _toy_orbitals()
+    tensor = build_coulomb_tensor(orbitals[:2], x, y, strength=1.0, softening=0.1)
+    assert tensor.shape == (2, 2, 2, 2)
+    assert np.allclose(tensor, tensor.transpose(2, 3, 0, 1))
+    assert tensor[0, 0, 0, 0] > 0
+
+
+def test_pair_density_integrates_to_two():
+    orbitals, x, y, area = _toy_orbitals()
+    result = solve_pair_ci(orbitals, np.array([1.0, 2.0, 4.0]), x, y, {"m_eff": 0.067, "epsilon_r": 12.9, "L0_nm": 30.0}, 3, ["singlet"], "zero", 0.05)
+    assert np.isclose(result.one_body_densities["singlet"].sum() * area, 2.0, atol=1e-5)
+
+
+def test_correlation_observables_are_normalized():
+    orbitals, x, y, area = _toy_orbitals()
+    result = solve_pair_ci(orbitals, np.array([1.0, 2.0, 4.0]), x, y, {"m_eff": 0.067, "epsilon_r": 12.9, "L0_nm": 30.0}, 3, ["singlet"], "zero", 0.05)
+    occupations = natural_occupations(result, "singlet")
+    report = correlation_report(result, x, area)
+    assert np.isclose(occupations.sum(), 2.0)
+    assert report["singlet"]["ci_participation_ratio"] >= 1.0
+    assert np.isclose(report["singlet"]["left_right_density"]["total_integral"], 2.0, atol=1e-5)
+
+
+def test_charge_sector_probabilities_sum_to_one():
+    orbitals, x, y, area = _toy_orbitals()
+    result = solve_pair_ci(orbitals, np.array([1.0, 2.0, 4.0]), x, y, {"m_eff": 0.067, "epsilon_r": 12.9, "L0_nm": 30.0}, 3, ["singlet"], "zero", 0.05)
+    charge = charge_sector_probabilities(orbitals, result, "singlet", x, area)
+    assert np.isclose(charge["normalization"], 1.0)
+    assert np.isclose(charge["P_20"] + charge["P_11"] + charge["P_02"], 1.0)

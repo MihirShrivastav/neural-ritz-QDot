@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neural-orbital-maps"
+version = "0.1.0"
+description = "Neural-orbital CI maps for exchange and correlation in semiconductor quantum-dot qubits."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "matplotlib>=3.8",
+  "numpy>=1.26",
+  "pydantic>=2.0",
+  "pyyaml>=6.0",
+  "scipy>=1.11",
+  "torch>=2.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+nom-one-electron = "neural_orbital_maps.cli.one_electron:main"
+nom-pair-ci = "neural_orbital_maps.cli.pair_ci:main"
+nom-analyze-run = "neural_orbital_maps.cli.analyze_run:main"
+nom-exchange-map = "neural_orbital_maps.cli.exchange_map:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

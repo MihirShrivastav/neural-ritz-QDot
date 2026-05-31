@@ -1,0 +1,41 @@
+experiment_name: default_pair
+results_root: results
+material:
+  name: GaAs
+  m_eff: 0.067
+  epsilon_r: 12.9
+  L0_nm: 30.0
+domain:
+  x_extent: 4.0
+  y_extent: 4.0
+  num_points: 48
+potential:
+  kind: biquadratic
+  separation: 1.4
+  barrier: 5.0
+  y_confinement: 4.0
+  detuning: 0.0
+solver:
+  K: 4
+  M: 6
+  network: siren
+  hidden_dim: 48
+  hidden_layers: 2
+  envelope_alpha: 0.12
+training:
+  steps: 200
+  lr: 0.0005
+  log_every: 25
+  seed: 42
+  dtype: float64
+  device: cpu
+  early_stop_patience: 50
+  early_stop_min_delta: 0.000001
+pair:
+  enabled: true
+  num_orbitals: 4
+  sectors: [singlet, triplet]
+  coulomb:
+    strength: material
+    softening: 0.05
+    integration: direct

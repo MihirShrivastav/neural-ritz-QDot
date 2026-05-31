@@ -1,0 +1,52 @@
+study_name: smoke_exchange_map
+results_root: results
+detuning:
+  min: -0.1
+  max: 0.1
+  num: 2
+barrier:
+  min: 1.8
+  max: 2.0
+  num: 2
+base_config:
+  experiment_name: smoke_exchange_point
+  results_root: results
+  material:
+    name: GaAs
+    m_eff: 0.067
+    epsilon_r: 12.9
+    L0_nm: 30.0
+  domain:
+    x_extent: 3.0
+    y_extent: 3.0
+    num_points: 10
+  potential:
+    kind: biquadratic
+    separation: 1.1
+    barrier: 2.0
+    y_confinement: 2.0
+    detuning: 0.0
+  solver:
+    K: 3
+    M: 4
+    network: siren
+    hidden_dim: 12
+    hidden_layers: 1
+    envelope_alpha: 0.12
+  training:
+    steps: 2
+    lr: 0.0005
+    log_every: 1
+    seed: 7
+    dtype: float64
+    device: cpu
+    early_stop_patience: 5
+    early_stop_min_delta: 0.000001
+  pair:
+    enabled: true
+    num_orbitals: 3
+    sectors: [singlet, triplet]
+    coulomb:
+      strength: zero
+      softening: 0.05
+      integration: direct
