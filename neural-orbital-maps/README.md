@@ -54,6 +54,12 @@ To run both baselines and comparison in one controlled benchmark folder:
 nom-pair-baseline-benchmark --config configs/smoke_pair.yaml
 ```
 
+To compare durations from completed runs:
+
+```bash
+nom-runtime-report --run-dir <run-a> --run-dir <run-b> --output-dir results/runtime/<report-id>
+```
+
 For a tiny detuning/barrier exchange map:
 
 ```bash
@@ -107,4 +113,4 @@ Important pair reports include `pair_energies.json`, `pair_exchange.json`, `dens
 
 Final orbitals are renormalized on the deterministic grid by default. The before/after norms are recorded in `one_electron_quality.json`. Training summaries report completed steps, configured steps, stop reason, early-stop status, and best eigensum. Entanglement summaries are computed from normalized natural occupations.
 
-Finite-difference baseline runs write `finite_difference_energies.json`, `fd_orbitals.npy`, `fd_energies.npy`, and density plots. Finite-difference pair-CI runs add the normal pair reports and plots using FD orbitals, which gives an independent exchange baseline for neural-orbital CI. Pair-baseline comparisons write `pair_baseline_comparison.json` and `pair_baseline_comparison.png`; the benchmark runner creates both underlying runs plus the comparison in a single study folder. Convergence studies write `points.csv`, `summary.json`, and per-axis convergence plots under `results/<study>/<study-id>/`; when enabled, they include finite-difference reference energies and neural-minus-baseline errors.
+Finite-difference baseline runs write `finite_difference_energies.json`, `fd_orbitals.npy`, `fd_energies.npy`, and density plots. Finite-difference pair-CI runs add the normal pair reports and plots using FD orbitals, which gives an independent exchange baseline for neural-orbital CI. Pair-baseline comparisons write `pair_baseline_comparison.json` and `pair_baseline_comparison.png`; the benchmark runner creates both underlying runs plus the comparison in a single study folder. Runtime reports write `runtime_report.json` and `runtime_comparison.png` from completed `final_summary.json` files. Convergence studies write `points.csv`, `summary.json`, and per-axis convergence plots under `results/<study>/<study-id>/`; when enabled, they include finite-difference reference energies and neural-minus-baseline errors.

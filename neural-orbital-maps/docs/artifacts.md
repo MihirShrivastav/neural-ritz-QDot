@@ -60,6 +60,16 @@ results/pair_baseline_benchmark/<study-id>/
   comparison/pair_baseline_comparison.png
 ```
 
+Runtime comparison outputs:
+
+```text
+<output-dir>/
+  runtime_report.json
+  runtime_comparison.png
+```
+
+`runtime_report.json` reads completed run `final_summary.json` files and reports mode, status, duration, fastest/slowest run, and the slowest-over-fastest ratio when defined.
+
 Required pair reports:
 
 - `pair_energies.json`

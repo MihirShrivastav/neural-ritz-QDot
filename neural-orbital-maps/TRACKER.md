@@ -14,7 +14,7 @@ Status legend:
 | Status | Item | Notes |
 |---|---|---|
 | `done` | Standalone project scaffold | Created `neural-orbital-maps/` with `pyproject.toml`, `src/`, `tests/`, `configs/`, `docs/`, `examples/`, `notebooks/`, `scripts/`, and `results/.gitkeep`. |
-| `done` | Package entrypoints | Added `nom-one-electron`, `nom-pair-ci`, `nom-analyze-run`, `nom-exchange-map`, `nom-convergence-study`, `nom-fd-baseline`, `nom-fd-pair-ci`, `nom-compare-pair-baselines`, and `nom-pair-baseline-benchmark`. |
+| `done` | Package entrypoints | Added `nom-one-electron`, `nom-pair-ci`, `nom-analyze-run`, `nom-exchange-map`, `nom-convergence-study`, `nom-fd-baseline`, `nom-fd-pair-ci`, `nom-compare-pair-baselines`, `nom-pair-baseline-benchmark`, and `nom-runtime-report`. |
 | `done` | Config system | Added Pydantic/YAML config models for material, domain, potential, solver, training, pair CI, and exchange-map sweeps. |
 | `done` | Run/artifact layout | Runs write `config.yaml`, `run_meta.json`, `logs/`, `arrays/`, `reports/`, `plots/`, and `checkpoints/`. |
 | `done` | Logging | CLIs write structured run logs via standard Python logging. |
@@ -44,6 +44,7 @@ Status legend:
 | `done` | Finite-difference pair-CI baseline | Added a workflow/CLI that feeds finite-difference orbitals through the same singlet/triplet pair-CI solver and writes standard pair artifacts. |
 | `done` | Pair baseline comparison report | Added neural-vs-finite-difference pair-CI comparison JSON and bar plot for exchange `J`. |
 | `done` | Controlled pair-baseline benchmark | Added a runner that executes neural pair CI, finite-difference pair CI, and baseline comparison in one reproducible study folder. |
+| `done` | Runtime comparison reports | Added runtime JSON/plot reports from completed run `final_summary.json` files. |
 | `done` | Baseline-aware convergence summaries | One-electron convergence studies can include finite-difference reference energies and neural-minus-baseline errors. |
 | `done` | Charge-sector probabilities | Added spatial-projector estimates of `P_20`, `P_11`, `P_02`, double occupancy, and charge imbalance. |
 | `done` | Two-site Hubbard diagnostic | Added approximate `t`, `U`, `V`, exchange `K`, and Hubbard singlet/triplet estimate from the lowest localized orbital pair. |
@@ -52,7 +53,7 @@ Status legend:
 | `done` | Future schema stub | Added `configs/exchange_map_stub.yaml` documenting intended future map schema. |
 | `done` | Documentation | Added README plus docs for physics model, architecture, artifact contract, and research roadmap. |
 | `done` | Test coverage | Added tests for config validation, units, grid, Ritz assembly, pair CI, observables, CLI workflow, convergence-study workflow, and exchange-map workflow. |
-| `done` | Verification | Verified `pytest` passes with 32 tests; verified `nom-pair-ci`, `nom-one-electron`, `nom-analyze-run`, `nom-exchange-map`, `nom-convergence-study`, `nom-fd-baseline`, `nom-fd-pair-ci`, `nom-compare-pair-baselines`, and `nom-pair-baseline-benchmark` smoke paths. |
+| `done` | Verification | Verified `pytest` passes with 33 tests; verified `nom-pair-ci`, `nom-one-electron`, `nom-analyze-run`, `nom-exchange-map`, `nom-convergence-study`, `nom-fd-baseline`, `nom-fd-pair-ci`, `nom-compare-pair-baselines`, `nom-pair-baseline-benchmark`, and `nom-runtime-report` smoke paths. |
 
 ## In Progress
 
@@ -61,7 +62,7 @@ Status legend:
 | `in_progress` | Exchange-map framework | Rectangular detuning/barrier sweeps and resume work, but execution is cold-started and serial. | Add parallel execution and warm starts. |
 | `in_progress` | Correlation/entanglement metrics | Natural-occupation entropy, linear entropy, effective orbital count, CI PR, charge sectors, localized orbitals, pair-correlation maps, heuristic interpretation labels, one-electron and pair-CI finite-difference validation support, Hubbard diagnostics, baseline comparison reports, and controlled benchmark runner exist. | Add disorder-aware validation examples after disorder generators are implemented. |
 | `in_progress` | Plotting | Basic scientific plots, single-run dashboard, exchange maps, sensitivity maps, one-electron convergence plots, CI-vs-Hubbard comparison plots, neural-vs-FD pair baseline plots, and controlled benchmark comparison plots exist. | Add publication-style comparison plots for disorder ensembles after disorder workflows exist. |
-| `in_progress` | One-electron solver quality | Thin runnable neural Block-Ritz core, quality diagnostics, final normalization, absolute/relative early stopping, non-finite loss guards, grid/basis/hidden-dim/seed convergence automation, finite-difference reference comparisons, and controlled pair-baseline benchmark exist. | Add runtime benchmarks. |
+| `in_progress` | One-electron solver quality | Thin runnable neural Block-Ritz core, quality diagnostics, final normalization, absolute/relative early stopping, non-finite loss guards, grid/basis/hidden-dim/seed convergence automation, finite-difference reference comparisons, controlled pair-baseline benchmark, and runtime reports exist. | Add disorder-aware/runtime benchmarks after disorder workflows exist. |
 
 ## Planned Next
 
@@ -74,7 +75,7 @@ Status legend:
 | `planned` | Disorder ensemble runner | Run many disorder realizations and report mean/std/quantiles of `J`, sensitivity, and sweet-spot shifts. |
 | `planned` | Noise-aware sweet-spot score | Combine `J`, gradients, and gate-noise covariance into a quality metric. |
 | `planned` | Imported potential maps | Support `.npy`/`.npz` potential grids with unit metadata. |
-| `planned` | Runtime benchmarks | Compare neural one-electron/pair workflows against finite-difference baselines on common smoke and realistic configs. |
+| `planned` | Disorder-aware/runtime benchmarks | Compare neural and finite-difference baselines under common disorder ensembles once disorder workflows exist. |
 | `planned` | CI-vs-Hubbard validation plots | Compare CI exchange against Hubbard estimates across controlled parameter sets. |
 | `planned` | Pair-CI convergence studies | Extend convergence workflow to pair-CI controls such as `num_orbitals` and Coulomb softening. |
 | `planned` | Paper figure recipes | Add reproducible commands/configs for each expected manuscript figure. |
@@ -108,10 +109,11 @@ nom-fd-baseline --config configs\smoke_pair.yaml
 nom-fd-pair-ci --config configs\smoke_pair.yaml
 nom-compare-pair-baselines --neural-run <neural-run> --fd-run <fd-run> --output-dir <output-dir>
 nom-pair-baseline-benchmark --config configs\smoke_pair.yaml
+nom-runtime-report --run-dir <run-a> --run-dir <run-b> --output-dir <output-dir>
 ```
 
 Expected current test result:
 
 ```text
-32 passed
+33 passed
 ```

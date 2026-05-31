@@ -74,6 +74,22 @@ def pair_baseline_comparison_plot(report: dict, path: str | Path) -> None:
     plt.close(fig)
 
 
+def runtime_comparison_plot(report: dict, path: str | Path) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    entries = report.get("entries", [])
+    labels = [entry.get("mode", "unknown") for entry in entries]
+    values = [float(entry.get("duration_sec", 0.0)) for entry in entries]
+    fig, ax = plt.subplots(figsize=(max(6, 1.8 * len(labels)), 4))
+    ax.bar(labels, values, color="#6b6f3f")
+    ax.set_ylabel("Duration (sec)")
+    ax.set_title("Runtime Comparison")
+    ax.tick_params(axis="x", rotation=20)
+    fig.tight_layout()
+    fig.savefig(path, dpi=180)
+    plt.close(fig)
+
+
 def difference_plot(a: np.ndarray, b: np.ndarray, x: np.ndarray, y: np.ndarray, title: str, path: str | Path) -> None:
     diff = a - b
     vmax = float(np.max(np.abs(diff))) if diff.size else 1.0
