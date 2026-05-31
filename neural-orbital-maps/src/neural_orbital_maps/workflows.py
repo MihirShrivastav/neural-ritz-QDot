@@ -164,6 +164,123 @@ def run_finite_difference_baseline(config: RunConfig) -> Path:
     return paths.run_dir
 
 
+def _pair_energy_payload(pair, e0: float) -> dict:
+    return {
+        "E0_meV": e0,
+        "sectors": {
+            sector: {
+                "E_dimless": vals.tolist(),
+                "E_meV": (vals * e0).tolist(),
+                "basis_dim": len(pair.sector_bases[sector].orbital_pairs),
+                "orbital_pairs": [list(p) for p in pair.sector_bases[sector].orbital_pairs],
+            }
+            for sector, vals in pair.sector_energies.items()
+        },
+    }
+
+
+def _save_pair_outputs(paths: RunPaths, config: RunConfig, pair, orbitals: np.ndarray, energies: np.ndarray, x: np.ndarray, y: np.ndarray, potential: np.ndarray) -> dict:
+    e0 = energy_scale_meV(config.material.m_eff, config.material.L0_nm)
+    exchange = exchange_report(pair, _material_dict(config))
+    save_arrays(
+        paths.arrays,
+        coulomb_tensor=pair.coulomb_tensor,
+        pair_ci_coeffs_singlet=pair.sector_coeffs.get("singlet", np.empty((0, 0))),
+        pair_ci_coeffs_triplet=pair.sector_coeffs.get("triplet", np.empty((0, 0))),
+        one_body_density_singlet=pair.one_body_densities.get("singlet", np.empty((0, 0))),
+        one_body_density_triplet=pair.one_body_densities.get("triplet", np.empty((0, 0))),
+    )
+    conditional_arrays = {}
+    for sector in pair.sector_energies:
+        conditional_arrays[f"conditional_density_{sector}"] = conditional_density(orbitals[: config.pair.num_orbitals], pair, sector)
+    save_arrays(paths.arrays, **conditional_arrays)
+    pair_correlation_arrays = {}
+    pair_correlation_reports = {}
+    for sector, density in pair.one_body_densities.items():
+        ratio, report = pair_correlation_map(orbitals[: config.pair.num_orbitals], pair, sector, density, float(abs(x[0, 1] - x[0, 0]) * abs(y[1, 0] - y[0, 0])))
+        pair_correlation_arrays[f"pair_correlation_{sector}"] = ratio
+        pair_correlation_reports[sector] = report
+    save_arrays(paths.arrays, **pair_correlation_arrays)
+    save_json(paths.reports / "pair_energies.json", _pair_energy_payload(pair, e0))
+    save_json(paths.reports / "pair_exchange.json", exchange)
+    cell_area = float(abs(x[0, 1] - x[0, 0]) * abs(y[1, 0] - y[0, 0]))
+    save_json(paths.reports / "density_checks.json", density_checks(pair, cell_area))
+    save_json(paths.reports / "ci_weights.json", ci_weights(pair))
+    _, localized_report = localized_orbitals_from_lowest_pair(orbitals[: config.pair.num_orbitals], x, cell_area)
+    hubbard = two_site_hubbard_report(energies[: config.pair.num_orbitals], pair.coulomb_tensor, localized_report.get("sign", 1.0))
+    save_json(paths.reports / "hubbard_report.json", hubbard)
+    save_json(paths.reports / "correlation_report.json", correlation_report(pair, x, cell_area, orbitals[: config.pair.num_orbitals]))
+    save_json(paths.reports / "pair_correlation_report.json", pair_correlation_reports)
+    for sector, density in pair.one_body_densities.items():
+        field_plot(density, x, y, f"{sector.title()} One-Body Density", "rho(x,y)", paths.plots / f"one_body_density_{sector}.png")
+    for sector, density in conditional_arrays.items():
+        field_plot(density, x, y, sector.replace("_", " ").title(), "P(r2 | r1)", paths.plots / f"{sector}.png")
+    for sector, ratio in pair_correlation_arrays.items():
+        field_plot(ratio, x, y, sector.replace("_", " ").title(), "g(r2 | r1)", paths.plots / f"{sector}.png")
+    if "singlet" in pair.one_body_densities and "triplet" in pair.one_body_densities:
+        difference_plot(
+            pair.one_body_densities["singlet"],
+            pair.one_body_densities["triplet"],
+            x,
+            y,
+            "Singlet - Triplet One-Body Density",
+            paths.plots / "one_body_density_difference.png",
+        )
+    exchange_bar(exchange, paths.plots / "exchange_summary.png")
+    hubbard_exchange_comparison(exchange, hubbard, e0, paths.plots / "hubbard_exchange_comparison.png")
+    pair_summary_dashboard(
+        potential,
+        pair.one_body_densities.get("singlet"),
+        pair.one_body_densities.get("triplet"),
+        pair_correlation_arrays.get("pair_correlation_singlet"),
+        x,
+        y,
+        exchange,
+        paths.plots / "pair_summary_dashboard.png",
+    )
+    return exchange
+
+
+def run_finite_difference_pair_ci(config: RunConfig) -> Path:
+    start = time.time()
+    paths = create_run(config)
+    logger = build_logger(paths.logs / "run.log")
+    logger.info("starting finite-difference pair CI baseline run")
+    try:
+        fd = solve_finite_difference(config)
+        _save_finite_difference(paths, config, fd)
+        pair = solve_pair_ci(
+            orbitals=fd.orbitals,
+            energies=fd.energies,
+            x=fd.grid.x,
+            y=fd.grid.y,
+            material=_material_dict(config),
+            num_orbitals=config.pair.num_orbitals,
+            sectors=list(config.pair.sectors),
+            coulomb_strength=config.pair.coulomb.strength,
+            softening=config.pair.coulomb.softening,
+        )
+        exchange = _save_pair_outputs(paths, config, pair, fd.orbitals, fd.energies, fd.grid.x, fd.grid.y, fd.potential)
+        save_json(
+            paths.reports / "final_summary.json",
+            {
+                "status": "completed",
+                "mode": "finite_difference_pair_ci",
+                "run_dir": str(paths.run_dir),
+                "duration_sec": time.time() - start,
+                "exchange": exchange,
+                "one_electron_source": "finite_difference",
+            },
+        )
+        finalize_run(paths, "completed")
+        logger.info("completed finite-difference pair CI baseline run at %s", paths.run_dir)
+    except Exception as exc:
+        finalize_run(paths, "failed", {"error": str(exc)})
+        logger.exception("finite-difference pair CI baseline run failed")
+        raise
+    return paths.run_dir
+
+
 def run_pair_ci(config: RunConfig) -> Path:
     start = time.time()
     paths = create_run(config)

@@ -28,6 +28,16 @@ Finite-difference baseline reports:
 - `orthonormality.json`
 - `final_summary.json`
 
+Finite-difference pair-CI runs additionally write the standard pair reports using finite-difference orbitals:
+
+- `pair_energies.json`
+- `pair_exchange.json`
+- `density_checks.json`
+- `ci_weights.json`
+- `hubbard_report.json`
+- `correlation_report.json`
+- `pair_correlation_report.json`
+
 Required pair reports:
 
 - `pair_energies.json`
@@ -59,6 +69,8 @@ Important finite-difference arrays:
 
 - `fd_orbitals.npy`
 - `fd_energies.npy`
+
+Finite-difference pair-CI runs also write the standard pair arrays such as `pair_ci_coeffs_singlet.npy`, `one_body_density_singlet.npy`, and `pair_correlation_singlet.npy`.
 
 Important pair arrays:
 
